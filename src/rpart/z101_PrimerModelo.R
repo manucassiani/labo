@@ -7,7 +7,7 @@ require("rpart")
 require("rpart.plot")
 
 #Aqui se debe poner la carpeta de SU computadora local
-setwd("D:\\gdrive\\ITBA2022A\\")  #Establezco el Working Directory
+setwd("/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT")  #Establezco el Working Directory
 
 #cargo los datos de 202011 que es donde voy a ENTRENAR el modelo
 dtrain  <- fread("./datasets/paquete_premium_202011.csv")
