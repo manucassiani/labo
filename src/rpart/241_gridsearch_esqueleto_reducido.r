@@ -8,7 +8,7 @@ require("data.table")
 require("rpart")
 require("parallel")
 
-ksemillas  <- c(102191, 200177, 410551, 552581, 892237) #reemplazar por las propias semillas
+ksemillas  <- c(200001, 200007, 500001, 999001, 999007) #reemplazar por las propias semillas
 
 #------------------------------------------------------------------------------
 #particionar agrega una columna llamada fold a un dataset que consiste en una particion estratificada segun agrupa
@@ -28,7 +28,7 @@ particionar  <- function( data,  division, agrupa="",  campo="fold", start=1, se
 ArbolEstimarGanancia  <- function( semilla, param_basicos )
 {
   #particiono estratificadamente el dataset
-  particionar( dataset, division=c(70,30), agrupa="clase_ternaria", seed= semilla )  #Cambiar por la primer semilla de cada uno !
+  particionar( dataset, division=c(70,30), agrupa="clase_ternaria", seed= semilla)  #Cambiar por la primer semilla de cada uno !
 
   #genero el modelo
   modelo  <- rpart("clase_ternaria ~ .",     #quiero predecir clase_ternaria a partir del resto
@@ -65,7 +65,7 @@ ArbolesMontecarlo  <- function( semillas, param_basicos )
                           semillas,   #paso el vector de semillas, que debe ser el primer parametro de la funcion ArbolEstimarGanancia
                           MoreArgs= list( param_basicos),  #aqui paso el segundo parametro
                           SIMPLIFY= FALSE,
-                          mc.cores= 1 )  #se puede subir a 5 si posee Linux o Mac OS
+                          mc.cores= 4 )  #se puede subir a 5 si posee Linux o Mac OS
 
   ganancia_promedio  <- mean( unlist(ganancias) )
 
@@ -74,7 +74,7 @@ ArbolesMontecarlo  <- function( semillas, param_basicos )
 #------------------------------------------------------------------------------
 
 #Aqui se debe poner la carpeta de la computadora local
-setwd("D:\\gdrive\\ITBA2022A\\")   #Establezco el Working Directory
+setwd("/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT")   #Establezco el Working Directory
 
 #cargo los datos
 dataset  <- fread("./datasets/paquete_premium_202011.csv")
@@ -94,20 +94,36 @@ cat( file=archivo_salida,
      sep= "",
      "max_depth", "\t",
      "min_split", "\t",
+     "min_bucket", "\t",
+     "cp", "\t",
      "ganancia_promedio", "\n")
 
 
 #itero por los loops anidados para cada hiperparametro
+#pacman::p_load(progress)
 
-for( vmax_depth  in  c( 4, 6, 8, 10, 12, 14 )  )
-{
-for( vmin_split  in  c( 1000, 800, 600, 400, 200, 100, 50, 20, 10 )  )
-{
+start_time = Sys.time()
 
+pb = txtProgressBar(min = 40, max = 3000, style = 3)
+#pb = progress_bar$new(total=9, width=60, clear=F, format = " Modeling [:bar] :percent ETA= :eta");
+
+for( vmax_depth  in  c( 5, 6, 7)  )
+{ print("max_depth = ");
+  print(vmax_depth);
+  
+for( vcp in c(-1, -0.1) )
+{ print("cp = ");
+  print(vcp);
+for( vmin_bucket in c(80,100,120) )
+{ print("min_bucket = ");
+  print(vmin_bucket);
+for( vmin_split  in  c(40,50,60,2400,2600,3000) )
+{ #pb$tick();
+  setTxtProgressBar(pb, vmin_split);
   #notar como se agrega
-  param_basicos  <- list( "cp"=         -0.5,       #complejidad minima
+  param_basicos  <- list( "cp"=         vcp,       #complejidad minima
                           "minsplit"=  vmin_split,  #minima cantidad de registros en un nodo para hacer el split
-                          "minbucket"=  5,          #minima cantidad de registros en una hoja
+                          "minbucket"= vmin_bucket,          #minima cantidad de registros en una hoja
                           "maxdepth"=  vmax_depth ) #profundidad máxima del arbol
 
   #Un solo llamado, con la semilla 17
@@ -119,7 +135,17 @@ for( vmin_split  in  c( 1000, 800, 600, 400, 200, 100, 50, 20, 10 )  )
         sep= "",
         vmax_depth, "\t",
         vmin_split, "\t",
+        vmin_bucket, "\t",
+        vcp, "\t",
         ganancia_promedio, "\n"  )
+  close(pb)
 
 }
 }
+}
+}
+print("Finish Grid Search")
+
+finish_time = Sys.time()
+time_elapsed = finish_time - start_time
+

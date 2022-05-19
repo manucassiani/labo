@@ -8,10 +8,10 @@ require("rpart.plot")
 
 #Aqui debe cambiar los parametros por los que desea probar
 
-param_basicos  <- list( "cp"=          -0.5,  #complejidad minima
-                        "minsplit"=   1800,     #minima cantidad de registros en un nodo para hacer el split
-                        "minbucket"=   400,     #minima cantidad de registros en una hoja
-                        "maxdepth"=    6 )    #profundidad máxima del arbol
+param_basicos  <- list( "cp"=          -1,  #complejidad minima
+                        "minsplit"=   400,     #minima cantidad de registros en un nodo para hacer el split
+                        "minbucket"=  30,     #minima cantidad de registros en una hoja
+                        "maxdepth"=     5 )    #profundidad máxima del arbol
 
 
 #Aqui se debe poner la carpeta de SU computadora local
@@ -24,11 +24,7 @@ dtrain  <- fread("./datasets/paquete_premium_202011.csv")
 modelo  <- rpart("clase_ternaria ~ .",  #quiero predecir clase_ternaria a partir de el resto de las variables
                  data = dtrain,
                  xval=0,
-                 cp=        -0.5,   #esto significa no limitar la complejidad de los splits
-                 minsplit=  1800,     #minima cantidad de registros para que se haga el split
-                 minbucket=  400,     #tamaño minimo de una hoja
-                 maxdepth=   6 )    #profundidad maxima del arbol
-
+                 control=  param_basicos )
 
 #grafico el arbol
 prp(modelo, extra=101, digits=5, branch=1, type=4, varlen=0, faclen=0)
@@ -56,9 +52,9 @@ entrega  <- dapply[   , list(numero_de_cliente, Predicted) ] #genero la salida
 
 #genero el archivo para Kaggle
 #creo la carpeta donde va el experimento
-dir.create( "./labo/exp/" ) 
-dir.create( "./labo/exp/KA2022/" ) 
+dir.create( "./labo/exp/", showWarnings = FALSE  )
+dir.create( "./labo/exp/KA2022/", showWarnings = FALSE  )
 
 fwrite( entrega, 
-        file= "./labo/exp/KA2022/K252_020.csv", 
+        file= "./labo/exp/KA2022/K242_021.csv", 
         sep= "," )

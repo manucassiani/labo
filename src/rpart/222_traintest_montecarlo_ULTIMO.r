@@ -5,7 +5,7 @@ require("data.table")
 require("rpart")
 require("parallel")
 
-ksemillas  <- c(200002, 200005, 500002, 999000, 999002) #reemplazar por las propias semillas
+ksemillas  <- c(200001, 200007, 500001, 999001, 999007) #reemplazar por las propias semillas
 
 #------------------------------------------------------------------------------
 #particionar agrega una columna llamada fold a un dataset que consiste en una particion estratificada segun agrupa
@@ -65,7 +65,7 @@ dataset  <- fread("./datasets/paquete_premium_202011.csv")
 # busco la mitad de las veces posibles y desp busco la mitad de los que dió mejor.
 # for(vmaxdepth in 2:30) -> esta mal probar todas es ineficiente
 
-param_basicos  <- list( "cp"=         -0.5,  #complejidad minima
+param_basicos  <- list( "cp"=         -0.1,  #complejidad minima
                         "minsplit"=  900,  #minima cantidad de registros en un nodo para hacer el split
                         "minbucket"=  440,  #minima cantidad de registros en una hoja
                         "maxdepth"=  5 ) #profundidad máxima del arbol
