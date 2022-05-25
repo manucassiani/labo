@@ -19,7 +19,7 @@ require("DiceKriging")
 require("mlrMBO")
 
 
-kBO_iter  <- 100   #cantidad de iteraciones de la Optimizacion Bayesiana
+kBO_iter  <- 300   #cantidad de iteraciones de la Optimizacion Bayesiana
 
 #Aqui se cargan los hiperparametros
 hs <- makeParamSet( 
@@ -30,7 +30,7 @@ hs <- makeParamSet(
          makeNumericParam("prob_corte",       lower= 1/120 , upper=  1/20)  #esto sera visto en clase en gran detalle
         )
 
-ksemilla_azar  <- 102191  #Aqui poner la propia semilla
+ksemilla_azar  <- 200001  #Aqui poner la propia semilla
 
 #------------------------------------------------------------------------------
 #graba a un archivo los componentes de lista
@@ -106,7 +106,7 @@ EstimarGanancia_lightgbm  <- function( x )
 
   param_completo  <- c( param_basicos, param_variable, x )
 
-  set.seed( 999983 )
+  set.seed( 200001 )
   modelocv  <- lgb.cv( data= dtrain,
                        eval= fganancia_logistic_lightgbm,
                        stratified= TRUE, #sobre el cross validation
@@ -135,24 +135,25 @@ EstimarGanancia_lightgbm  <- function( x )
   return( ganancia )
 }
 #------------------------------------------------------------------------------
+start_time = Sys.time()
 #Aqui empieza el programa
 
 #Aqui se debe poner la carpeta de la computadora local
-setwd("~/buckets/b1/")   #Establezco el Working Directory
+setwd("/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT")   #Establezco el Working Directory
 
 #cargo el dataset donde voy a entrenar el modelo
-dataset  <- fread("./datasets/paquete_premium_202011.csv.gz")
+dataset  <- fread("./datasets/paquete_premium_202011.csv")
 
 #creo la carpeta donde va el experimento
 # HT  representa  Hiperparameter Tuning
-dir.create( "./exp/",  showWarnings = FALSE ) 
-dir.create( "./exp/HT5430/", showWarnings = FALSE )
-setwd("./exp/HT5430/")   #Establezco el Working Directory DEL EXPERIMENTO
+dir.create( "/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT/labo/exp/",  showWarnings = FALSE ) 
+dir.create( "/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT/labo/exp/HT5430/", showWarnings = FALSE )
+setwd("/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT/labo/exp/HT5430/")   #Establezco el Working Directory DEL EXPERIMENTO
 
 
 #en estos archivos quedan los resultados
-kbayesiana  <- "HT543.RDATA"
-klog        <- "HT543.txt"
+kbayesiana  <- "HT543_2.RDATA"
+klog        <- "HT543_2.txt"
 
 
 GLOBAL_iteracion  <- 0   #inicializo la variable global
@@ -205,12 +206,17 @@ surr.km  <- makeLearner("regr.km", predict.type= "se", covtype= "matern3_2", con
 if( !file.exists( kbayesiana ) ) {
   run  <- mbo(obj.fun, learner= surr.km, control= ctrl)
 } else {
+  print("retomo caso existente")
   run  <- mboContinue( kbayesiana )   #retomo en caso que ya exista
 }
 
 
 quit( save="no" )
 
+finish_time = Sys.time()
+time_elapsed = finish_time - start_time
+print('El tiempo transcurrido para la optimización bayesiana fue de :')
+print(time_elapsed)
 
 # pero nosotros  NO nos vamos a quedar tranquilos sin cuestionar los hiperparametros originales
 # min_data_in_leaf  y  num_leaves   estan relacionados entre ellos

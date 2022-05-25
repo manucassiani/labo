@@ -64,8 +64,10 @@ Estrategia_A  <- function()
   planilla_cazatalentos  <- data.table( "id"= 1:100 )
 
   #Ronda 1  ------------------------------------------------------
-  #tiran los 100 jugadores es decir 1:100   90  tiros libres cada uno
+  #tiran los 100 jugadores es decir 1:100   50  tiros libres cada uno
   ids_juegan1  <- 1:100   #los jugadores que participan en la ronda,
+  print("ids_juegan1")
+  print(length(ids_juegan1))
 
   planilla_cazatalentos[ ids_juegan1,  tiros1 := 90 ]  #registro en la planilla que tiran 90 tiros
 
@@ -74,10 +76,12 @@ Estrategia_A  <- function()
   planilla_cazatalentos[ ids_juegan1,  aciertos1 := resultado1 ]  #registro en la planilla
 
   #Ronda 2 -------------------------------------------------------
-  #A la mitad mejor la hago tirar 400 tiros cada uno
+  #A la mitad mejor la hago tirar 200 tiros cada uno
   #La mediana siempre parte a un conjunto en dos partes de igual cantidad
   mediana  <- planilla_cazatalentos[ ids_juegan1, median(aciertos1) ]
   ids_juegan2  <- planilla_cazatalentos[ ids_juegan1 ][ aciertos1 >= mediana, id ]
+  print("ids_juegan2")
+  print(length(ids_juegan2))  
 
   planilla_cazatalentos[ ids_juegan2,  tiros2 := 400 ]  #registro en la planilla que tiran 400 tiros
   resultado2  <- gimnasio_tirar( ids_juegan2, 400)
@@ -98,17 +102,19 @@ Estrategia_A  <- function()
 
 #Aqui hago la Estimacion Montecarlo del porcentaje de aciertos que tiene la estrategia A
 
-set.seed( 102191 )  #debe ir una sola vez, ANTES de los experimentos
+set.seed( 300000 )  #debe ir una sola vez, ANTES de los experimentos
 
 tabla_veredictos  <- data.table(  tiros_total=integer(),  acierto=integer() )
 
-for( experimento  in  1:10000 )
+for( experimento  in  1:200 )
 {
   if( experimento %% 1000 == 0 )  cat( experimento, " ")  #desprolijo, pero es para saber por donde voy
 
   veredicto  <- Estrategia_A()
   
   tabla_veredictos  <- rbind( tabla_veredictos, veredicto )
+  
+  if( experimento == 199){ print(tabla_veredictos)}
 }
 
 cat("\n")

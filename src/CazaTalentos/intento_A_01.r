@@ -94,6 +94,9 @@ veredicto  <- gimnasio_veredicto( id_mejor )
 
 veredicto
 
+tiros_total  <-  tabla_veredictos[  , max( tiros_total) ]
+print(tiros_total)
+
 
 #El veredicto da que la estrategia seguida por el cazatalentos fue exitosa para este caso
 #Le acerto al verdadero_mejor

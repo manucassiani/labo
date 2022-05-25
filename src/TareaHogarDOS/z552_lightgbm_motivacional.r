@@ -18,10 +18,10 @@ require("data.table")
 require("lightgbm")
 
 
-ksemilla  <- 102191  #poner aqui la PRIMERA de sus cinco semillas
+ksemilla  <- 200001  #poner aqui la PRIMERA de sus cinco semillas
 
 #Aqui se debe poner la carpeta de la computadora local
-setwd("D:\\gdrive\\ITBA2022A\\")   #Establezco el Working Directory
+setwd("/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT/")   #Establezco el Working Directory
 
 #cargo el dataset donde voy a entrenar
 dataset  <- fread("./datasets/paquete_premium_202011.csv", stringsAsFactors= TRUE)
@@ -70,9 +70,9 @@ entrega  <- as.data.table( list( "numero_de_cliente"= dapply[  , numero_de_clien
 
 #guardo el resultado
 #creo las carpetas
-dir.create( "./labo/exp/",  showWarnings = FALSE ) 
-dir.create( "./labo/exp/KA5520/", showWarnings = FALSE )
-setwd( "./labo/exp/KA5520/" )
+dir.create( "/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT/labo/exp/",  showWarnings = FALSE ) 
+dir.create( "/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT/labo/exp/KA5520/", showWarnings = FALSE )
+setwd( "/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT/labo/exp/KA5520/" )
 
 archivo_salida  <- "KA_552_001.csv"
 

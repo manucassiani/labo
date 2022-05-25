@@ -114,15 +114,15 @@ pb = txtProgressBar(min = 400, max = 800, style = 3)
 
 start_time = Sys.time()
 
-for( vmax_depth  in  c(6,7,8)  )
+for( vmax_depth  in  c(7)  )
 {
   print("max_depth = ");
   print(vmax_depth);
-for( vmin_split  in  c(1200,1300,1400,1600,1700,1800,1900)  )
+for( vmin_split  in  c(1400)  )
 {
   print("min_split = ");
   print(vmin_split);  
-for( vmin_bucket in c(350, 400, 450) )
+for( vmin_bucket in c(400) )
 {
   print("min_bucket = ");
   print(vmin_bucket);
@@ -132,8 +132,8 @@ for( vmin_bucket in c(350, 400, 450) )
     print("-----------------------")
     next
   }
-for( vpeso_error  in  c(400,500,600,700,800) )
-{
+for( vpeso_error  in  c(10,20,40,60,80,100,150,200,250,300,400,600,700,900,1000) )
+{ print("peso_error"); print(vpeso_error);
   setTxtProgressBar(pb, vpeso_error);
   
   #notar como se agrega
@@ -144,6 +144,8 @@ for( vpeso_error  in  c(400,500,600,700,800) )
 
   #Un solo llamado, con la semilla 17
   ganancia_promedio  <- ArbolesMontecarlo( ksemillas,  param_basicos, vpeso_error )
+  print("ganancia")
+  print(ganancia_promedio)
 
   #escribo los resultados al archivo de salida
   cat(  file=archivo_salida,

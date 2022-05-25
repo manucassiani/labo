@@ -65,10 +65,10 @@ dataset  <- fread("./datasets/paquete_premium_202011.csv")
 # busco la mitad de las veces posibles y desp busco la mitad de los que dió mejor.
 # for(vmaxdepth in 2:30) -> esta mal probar todas es ineficiente
 
-param_basicos  <- list( "cp"=         -0.5,  #complejidad minima
-                        "minsplit"=  900,  #minima cantidad de registros en un nodo para hacer el split
-                        "minbucket"=  440,  #minima cantidad de registros en una hoja
-                        "maxdepth"=  5 ) #profundidad máxima del arbol
+param_basicos  <- list( "cp"=         -1,  #complejidad minima
+                        "minsplit"=  2,  #minima cantidad de registros en un nodo para hacer el split
+                        "minbucket"=  1,  #minima cantidad de registros en una hoja
+                        "maxdepth"=  30 ) #profundidad máxima del arbol
                         #maxdepth = vmaxdepth
 
 #Un solo llamado, con la semilla 17

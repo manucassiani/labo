@@ -9,9 +9,9 @@ require("rpart.plot")
 #Aqui debe cambiar los parametros por los que desea probar
 
 param_basicos  <- list( "cp"=          -0.5,  #complejidad minima
-                        "minsplit"=   1800,     #minima cantidad de registros en un nodo para hacer el split
+                        "minsplit"=   1400,     #minima cantidad de registros en un nodo para hacer el split
                         "minbucket"=   400,     #minima cantidad de registros en una hoja
-                        "maxdepth"=    6 )    #profundidad máxima del arbol
+                        "maxdepth"=    7 )    #profundidad máxima del arbol
 
 
 #Aqui se debe poner la carpeta de SU computadora local
@@ -25,9 +25,9 @@ modelo  <- rpart("clase_ternaria ~ .",  #quiero predecir clase_ternaria a partir
                  data = dtrain,
                  xval=0,
                  cp=        -0.5,   #esto significa no limitar la complejidad de los splits
-                 minsplit=  1800,     #minima cantidad de registros para que se haga el split
+                 minsplit=  1400,     #minima cantidad de registros para que se haga el split
                  minbucket=  400,     #tamaño minimo de una hoja
-                 maxdepth=   6 )    #profundidad maxima del arbol
+                 maxdepth=   7 )    #profundidad maxima del arbol
 
 
 #grafico el arbol
@@ -49,7 +49,7 @@ prediccion  <- predict( modelo, dapply , type = "prob")
 dapply[ , prob_baja2 := prediccion[, "BAJA+2"] ]
 
 #solo le envio estimulo a los registros con probabilidad de BAJA+2 mayor  a  1/60
-dapply[ , Predicted  := as.numeric(prob_baja2 > 1/60) ]
+dapply[ , Predicted  := as.numeric(prob_baja2 > 1/800) ]
 
 #genero un dataset con las dos columnas que me interesan
 entrega  <- dapply[   , list(numero_de_cliente, Predicted) ] #genero la salida
@@ -60,5 +60,5 @@ dir.create( "./labo/exp/" )
 dir.create( "./labo/exp/KA2022/" ) 
 
 fwrite( entrega, 
-        file= "./labo/exp/KA2022/K252_020.csv", 
+        file= "./labo/exp/KA2022/K252_037.csv", 
         sep= "," )
