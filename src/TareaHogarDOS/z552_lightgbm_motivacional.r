@@ -18,7 +18,7 @@ require("data.table")
 require("lightgbm")
 
 
-ksemilla  <- 200001  #poner aqui la PRIMERA de sus cinco semillas
+ksemilla  <- 200007  #poner aqui la PRIMERA de sus cinco semillas
 
 #Aqui se debe poner la carpeta de la computadora local
 setwd("/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT/")   #Establezco el Working Directory
@@ -74,7 +74,7 @@ dir.create( "/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT/labo/exp/"
 dir.create( "/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT/labo/exp/KA5520/", showWarnings = FALSE )
 setwd( "/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT/labo/exp/KA5520/" )
 
-archivo_salida  <- "KA_552_001.csv"
+archivo_salida  <- "KA_552_018.csv"
 
 #genero el archivo para Kaggle
 fwrite( entrega, 
@@ -84,7 +84,7 @@ fwrite( entrega,
 
 #ahora imprimo la importancia de variables
 tb_importancia  <-  as.data.table( lgb.importance(modelo) ) 
-archivo_importancia  <- "552_importancia_001.txt"
+archivo_importancia  <- "552_importancia_018.txt"
 
 fwrite( tb_importancia, 
         file= archivo_importancia, 
