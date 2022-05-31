@@ -8,7 +8,7 @@ require("data.table")
 require("lightgbm")
 
 #Aqui se debe poner la carpeta de la computadora local
-setwd("D:\\gdrive\\ITBA2022A\\")   #Establezco el Working Directory
+setwd("/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT")   #Establezco el Working Directory
 
 #cargo el dataset donde voy a entrenar
 dataset  <- fread("./datasets/paquete_premium_202011.csv", stringsAsFactors= TRUE)
@@ -30,12 +30,21 @@ dtrain  <- lgb.Dataset( data= data.matrix(  dataset[ , campos_buenos, with=FALSE
 
 #genero el modelo con los parametros por default
 modelo  <- lgb.train( data= dtrain,
-                      param= list( objective=        "binary",
-                                   num_iterations=     50,
-                                   num_leaves=         64,
-                                   feature_fraction=    0.5,
-                                   min_data_in_leaf= 3000,
-                                   seed= 4 )
+                      param= list( objective= "binary",
+                                   metric= "custom",
+                                   first_metric_only= TRUE,
+                                   boost_from_average= TRUE,
+                                   feature_pre_filter= FALSE,
+                                   verbosity= -100,
+                                   seed= 999007,
+                                   max_depth=  -1,         # -1 significa no limitar,  por ahora lo dejo fijo
+                                   min_gain_to_split= 0.0, #por ahora, lo dejo fijo
+                                   lambda_l1= 0.0,         #por ahora, lo dejo fijo
+                                   lambda_l2= 0.0,         #por ahora, lo dejo fijo
+                                   num_iterations= 100,    #un numero muy grande, lo limita early_stopping_rounds
+                                   force_row_wise= TRUE    #para que los alumnos no se atemoricen con tantos warning
+                                   
+                      )
                     )
 
 #aplico el modelo a los datos sin clase
@@ -52,11 +61,11 @@ prediccion  <- predict( modelo,
 
 #Genero la entrega para Kaggle
 entrega  <- as.data.table( list( "numero_de_cliente"= dapply[  , numero_de_cliente],
-                                 "Predicted"= as.integer(prediccion > 1/60 ) )  ) #genero la salida
+                                 "Predicted"= as.integer(prediccion > 0.0075 ) )  ) #genero la salida
 
 dir.create( "./labo/exp/",  showWarnings = FALSE ) 
 dir.create( "./labo/exp/KA2512/", showWarnings = FALSE )
-archivo_salida  <- "./labo/exp/KA2512/KA_512_001.csv"
+archivo_salida  <- "./labo/exp/KA2512/KA_512_011.csv"
 
 #genero el archivo para Kaggle
 fwrite( entrega, 
@@ -66,7 +75,7 @@ fwrite( entrega,
 
 #ahora imprimo la importancia de variables
 tb_importancia  <-  as.data.table( lgb.importance(modelo) ) 
-archivo_importancia  <- "./labo/exp/KA2512/512_importancia_001.txt"
+archivo_importancia  <- "./labo/exp/KA2512/512_importancia_011.txt"
 
 fwrite( tb_importancia, 
         file= archivo_importancia, 
