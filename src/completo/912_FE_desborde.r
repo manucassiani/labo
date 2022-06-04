@@ -247,9 +247,9 @@ AgregarVariables  <- function( dataset )
   dataset[ , mvr_mconsumototal       := mv_mconsumototal  / mv_mlimitecompra ]
   dataset[ , mvr_mpagominimo         := mv_mpagominimo  / mv_mlimitecompra ]
 
-  dataset[ , variable_nueva := 5 ]
   #Aqui debe usted agregar sus propias nuevas variables
-
+  dataset[ , variable_nueva := 5 ]
+  
   #valvula de seguridad para evitar valores infinitos
   #paso los infinitos a NULOS
   infinitos      <- lapply(names(dataset),function(.name) dataset[ , sum(is.infinite(get(.name)))])
