@@ -248,7 +248,14 @@ AgregarVariables  <- function( dataset )
   dataset[ , mvr_mpagominimo         := mv_mpagominimo  / mv_mlimitecompra ]
 
   #Aqui debe usted agregar sus propias nuevas variables
-  dataset[ , variable_nueva := 5 ]
+  all_interactions = combn(names(dataset), 2)  
+  for (position in seq(length(all_interactions)/2))
+  {
+    col1 = all_interactions[,position][1]
+    col2 = all_interactions[,position][2]
+    col_name = paste(col1,col2,sep="_VS_")
+    dataset[ , toString(col_name)      := as.numeric(gsub(",",".",get(col1),fixed=TRUE)) * as.numeric(gsub(",",".",get(col2),fixed=TRUE)) ]
+  }
   
   #valvula de seguridad para evitar valores infinitos
   #paso los infinitos a NULOS
@@ -382,7 +389,7 @@ cppFunction('NumericVector fhistC(NumericVector pcolumna, IntegerVector pdesde )
 #la tendencia es la pendiente de la recta que ajusta por cuadrados minimos
 #La funcionalidad de ratioavg es autoria de  Daiana Sparta,  UAustral  2021
 
-TendenciaYmuchomas  <- function( dataset, cols, ventana=6, tendencia=TRUE, minimo=TRUE, maximo=TRUE, promedio=TRUE, 
+TendenciaYmuchomas6  <- function( dataset, cols, ventana=6, tendencia=TRUE, minimo=TRUE, maximo=TRUE, promedio=TRUE, 
                                  ratioavg=FALSE, ratiomax=FALSE)
 {
   gc()
@@ -419,7 +426,7 @@ TendenciaYmuchomas  <- function( dataset, cols, ventana=6, tendencia=TRUE, minim
 #la tendencia es la pendiente de la recta que ajusta por cuadrados minimos
 #La funcionalidad de ratioavg es autoria de  Daiana Sparta,  UAustral  2021
 
-TendenciaYmuchomasDOS  <- function( dataset, cols, ventana=12, tendencia=TRUE, minimo=TRUE, maximo=TRUE, promedio=TRUE, 
+TendenciaYmuchomas12  <- function( dataset, cols, ventana=12, tendencia=TRUE, minimo=TRUE, maximo=TRUE, promedio=TRUE, 
                                  ratioavg=FALSE, ratiomax=FALSE)
 {
   gc()
@@ -596,11 +603,11 @@ if( PARAM$variablesmanuales )  AgregarVariables( dataset )
 
 cols_lagueables  <- copy( setdiff( colnames(dataset), PARAM$const$campos_fijos ) )
 
-if( PARAM$tendenciaYmuchomas$correr ) 
+if( PARAM$tendenciaYmuchomas6$correr ) 
 {
-  p  <- PARAM$tendenciaYmuchomas
+  p  <- PARAM$tendenciaYmuchomas6
 
-  TendenciaYmuchomas( dataset, 
+  TendenciaYmuchomas6( dataset, 
                       cols= cols_lagueables,
                       ventana=   p$ventana,
                       tendencia= p$tendencia,
@@ -611,6 +618,24 @@ if( PARAM$tendenciaYmuchomas$correr )
                       ratiomax=  p$ratiomax
                     )
 
+}
+
+
+if( PARAM$tendenciaYmuchomas12$correr ) 
+{
+  p  <- PARAM$tendenciaYmuchomas12
+  
+  TendenciaYmuchomas12( dataset, 
+                       cols= cols_lagueables,
+                       ventana=   p$ventana,
+                       tendencia= p$tendencia,
+                       minimo=    p$minimo,
+                       maximo=    p$maximo,
+                       promedio=  p$promedio,
+                       ratioavg=  p$ratioavg,
+                       ratiomax=  p$ratiomax
+  )
+  
 }
 
 

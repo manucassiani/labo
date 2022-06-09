@@ -17,10 +17,10 @@ require("randomForest")
 require("ranger")
 
 
-setwd( "/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT/" )  #cambiar por la carpeta local
+setwd( "~/buckets/b1/" )  #cambiar por la carpeta local
 
 #leo el dataset
-dataset  <- fread( "./datasets/paquete_premium_202011.csv", stringsAsFactors= TRUE)
+dataset  <- fread( "./datasets/paquete_premium.csv.gz", stringsAsFactors= TRUE)
 
 #me quedo SOLO con los BAJA+2
 dataset  <- dataset[  clase_ternaria =="BAJA+2"  & foto_mes>=202001  & foto_mes<=202011, ]
@@ -49,7 +49,8 @@ modelo  <- randomForest( x= dataset[  , campos_buenos, with=FALSE ],
                          y= NULL, 
                          ntree= 1000, #se puede aumentar a 10000
                          proximity= TRUE, 
-                         oob.prox=  TRUE )
+                         oob.prox=  TRUE,
+                         importance= TRUE)
 
 #genero los clusters jerarquicos
 hclust.rf  <- hclust( as.dist ( 1.0 - modelo$proximity),  #distancia = 1.0 - proximidad
@@ -60,34 +61,41 @@ hclust.rf  <- hclust( as.dist ( 1.0 - modelo$proximity),  #distancia = 1.0 - pro
 #primero, creo la carpeta donde van los resultados
 dir.create( "./exp/", showWarnings= FALSE )
 dir.create( "./exp/ST7610", showWarnings= FALSE )
-setwd( "/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT/labo/exp/ST7610" )
+setwd( "~/buckets/b1/exp/ST7610" )
 
 
 #imprimo un pdf con la forma del cluster jerarquico
-pdf( "cluster_jerarquico.pdf" )
+pdf( "cluster_jerarquico_4.pdf" )
 plot( hclust.rf )
 dev.off()
 
 #cluster jerarquico usando librería dendextend
 library(dendextend)
-hclust_colored <- color_branches(hclust.rf, h=10000, k=7)
-pdf( "cluster_jerarquico_color.pdf" )
+hclust_colored <- color_branches(hclust.rf)
+pdf( "cluster_jerarquico_color_4.pdf" )
 plot(hclust_colored)
 dev.off()
 
+#ahora imprimo la importancia de variables
+tb_importancia  <-  as.data.table( importance(modelo) ) 
 
-#genero 7 clusters
+fwrite( tb_importancia, 
+        file= "impo.txt", 
+        sep= "\t" )
+
+
+#genero 4 clusters
 h <- 20
 distintos <- 0
 
-while(  h>0  &  !( distintos >=6 & distintos <=7 ) )
+while(  h>0  &  !( distintos >=3 & distintos <=4 ) )
 {
   h <- h - 1 
   rf.cluster  <- cutree( hclust.rf, h)
-
+  
   dataset[  , cluster2 := NULL ]
   dataset[  , cluster2 := rf.cluster ]
-
+  
   distintos  <- nrow( dataset[  , .N,  cluster2 ] )
   cat( distintos, " " )
 }
@@ -99,11 +107,11 @@ dataset[  , .N,  cluster2 ]  #tamaño de los clusters
 
 #grabo el dataset en el bucket, luego debe bajarse a la PC y analizarse
 fwrite( dataset,
-        file= "cluster_de_bajas.txt",
+        file= "cluster_de_bajas_4.txt",
         sep= "\t" )
 
 
-#ahora a mano veo los centroides de los 7 clusters
+#ahora a mano veo los centroides de los 4 clusters
 #esto hay que hacerlo para cada variable,
 #  y ver cuales son las que mas diferencian a los clusters
 #esta parte conviene hacerla desde la PC local, sobre  cluster_de_bajas.txt
