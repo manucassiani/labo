@@ -19,7 +19,7 @@ param:
   
   variablesmanuales: TRUE
   
-  acumulavars: FALSE   #a lo nuevo lo va aplicando
+  acumulavars: TRUE   #a lo nuevo lo va aplicando
 
   tendenciaYmuchomas3: 
     correr: TRUE #Great power comes with great responsability
@@ -51,7 +51,7 @@ param:
     ratioavg:  TRUE
     ratiomax:  TRUE
 
-  tendenciaYmuchomas12: 
+  tendenciaYmuchomas18: 
     correr: TRUE #Great power comes with great responsability
     ventana: 18
     tendencia: TRUE
