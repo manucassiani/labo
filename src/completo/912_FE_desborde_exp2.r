@@ -248,12 +248,24 @@ AgregarVariables  <- function( dataset )
   dataset[ , mvr_mpagominimo         := mv_mpagominimo  / mv_mlimitecompra ]
 
   #Aqui debe usted agregar sus propias nuevas variables
-  all_interactions = combn(names(dataset), 2)  
+  
+  # 85 variables para hacer interacciones
+  campos_buenos = c("cliente_vip","internet","cliente_edad","cliente_antiguedad","mrentabilidad","mrentabilidad_annual","mcomisiones","mactivos_margen","mpasivos_margen","cproductos",
+                    "mcuenta_corriente_adicional","mcuenta_corriente","mcaja_ahorro","mcaja_ahorro_adicional","mcaja_ahorro_dolares","mdescubierto_preacordado","mcuentas_saldo","ctarjeta_debito_trx","mautoservicio","ctarjeta_visa",
+                    "ctarjeta_visa_trx","mtarjeta_visa_consumo","ctarjeta_master_trx","mtarjeta_master_consumo","cprestamos_personales","mprestamos_personales","mprestamos_prendarios","mprestamos_hipotecarios","cplazo_fijo","mplazo_fijo_dolares",
+                    "cseguro_vida","cseguro_accidentes_personales","ccaja_seguridad","cpayroll_trx","mpayroll","ccuenta_debitos_automaticos","mcuenta_debitos_automaticos","ctarjeta_visa_debitos_automaticos","mtarjeta_visa_debitos_automaticos","mttarjeta_master_debitos_automaticos",
+                    "mpagomiscuentas","ctarjeta_visa_descuentos","mtarjeta_visa_descuentos","ccomisiones_mantenimiento","mcomisiones_mantenimiento","ccomisiones_otras","mcomisiones_otras","mforex_sell","ctransferencias_recibidas","mtransferencias_recibidas",
+                    "ctransferencias_emitidas","mtransferencias_emitidas","cextraccion_autoservicio","mextraccion_autoservicio","mcheques_depositados","tcallcenter","ccallcenter_trx","thomebanking","chomebanking_trx","ccajas_trx",
+                    "ccajas_consultas","ctrx_quarter","tmobile_app","cmobile_app_trx","Master_mfinanciacion_limite","Master_msaldototal","Master_status","Master_mlimitecompra","Master_fultimo_cierre","Master_mpagado",
+                    "Master_fechaalta","Master_mpagominimo","Visa_msaldototal","Visa_Finiciomora","Visa_mfinanciacion_limite","Visa_msaldopesos","Visa_mconsumospesos","Visa_mconsumosdolares","Visa_mlimitecompra","Visa_fultimo_cierre",
+                    "Visa_mpagado","Visa_mpagospesos","Visa_fechaalta","Visa_cconsumos","Visa_mpagominimo")
+
+  all_interactions = combn(campos_buenos, 2)
   for (position in seq(length(all_interactions)/2))
   {
     col1 = all_interactions[,position][1]
     col2 = all_interactions[,position][2]
-    col_name = paste(col1,col2,sep="_VS_")
+    col_name = paste(col1,col2,sep="_PROD_")
     dataset[ , toString(col_name)      := as.numeric(gsub(",",".",get(col1),fixed=TRUE)) * as.numeric(gsub(",",".",get(col2),fixed=TRUE)) ]
   }  
   
@@ -388,119 +400,8 @@ cppFunction('NumericVector fhistC(NumericVector pcolumna, IntegerVector pdesde )
 #la tendencia es la pendiente de la recta que ajusta por cuadrados minimos
 #La funcionalidad de ratioavg es autoria de  Daiana Sparta,  UAustral  2021
 
-TendenciaYmuchomas3  <- function( dataset, cols, ventana=3, tendencia=TRUE, minimo=TRUE, maximo=TRUE, promedio=TRUE, 
+TendenciaYmuchomas  <- function( dataset, cols, ventana=3, tendencia=TRUE, minimo=TRUE, maximo=TRUE, promedio=TRUE, 
                                   ratioavg=FALSE, ratiomax=FALSE)
-{
-  gc()
-  #Esta es la cantidad de meses que utilizo para la historia
-  ventana_regresion  <- ventana
-  
-  last  <- nrow( dataset )
-  
-  #creo el vector_desde que indica cada ventana
-  #de esta forma se acelera el procesamiento ya que lo hago una sola vez
-  vector_ids   <- dataset$numero_de_cliente
-  
-  vector_desde  <- seq( -ventana_regresion+2,  nrow(dataset)-ventana_regresion+1 )
-  vector_desde[ 1:ventana_regresion ]  <-  1
-  
-  for( i in 2:last )  if( vector_ids[ i-1 ] !=  vector_ids[ i ] ) {  vector_desde[i] <-  i }
-  for( i in 2:last )  if( vector_desde[i] < vector_desde[i-1] )  {  vector_desde[i] <-  vector_desde[i-1] }
-  
-  for(  campo  in   cols )
-  {
-    nueva_col     <- fhistC( dataset[ , get(campo) ], vector_desde ) 
-    
-    if(tendencia)  dataset[ , paste0( campo, "_tend", ventana) := nueva_col[ (0*last +1):(1*last) ]  ]
-    if(minimo)     dataset[ , paste0( campo, "_min", ventana)  := nueva_col[ (1*last +1):(2*last) ]  ]
-    if(maximo)     dataset[ , paste0( campo, "_max", ventana)  := nueva_col[ (2*last +1):(3*last) ]  ]
-    if(promedio)   dataset[ , paste0( campo, "_avg", ventana)  := nueva_col[ (3*last +1):(4*last) ]  ]
-    if(ratioavg)   dataset[ , paste0( campo, "_ratioavg", ventana)  := get(campo) /nueva_col[ (3*last +1):(4*last) ]  ]
-    if(ratiomax)   dataset[ , paste0( campo, "_ratiomax", ventana)  := get(campo) /nueva_col[ (2*last +1):(3*last) ]  ]
-  }
-  
-}
-#------------------------------------------------------------------------------
-#calcula la tendencia de las variables cols de los ultimos 6 meses
-#la tendencia es la pendiente de la recta que ajusta por cuadrados minimos
-#La funcionalidad de ratioavg es autoria de  Daiana Sparta,  UAustral  2021
-
-TendenciaYmuchomas6  <- function( dataset, cols, ventana=6, tendencia=TRUE, minimo=TRUE, maximo=TRUE, promedio=TRUE, 
-                                 ratioavg=FALSE, ratiomax=FALSE)
-{
-  gc()
-  #Esta es la cantidad de meses que utilizo para la historia
-  ventana_regresion  <- ventana
-
-  last  <- nrow( dataset )
-
-  #creo el vector_desde que indica cada ventana
-  #de esta forma se acelera el procesamiento ya que lo hago una sola vez
-  vector_ids   <- dataset$numero_de_cliente
-
-  vector_desde  <- seq( -ventana_regresion+2,  nrow(dataset)-ventana_regresion+1 )
-  vector_desde[ 1:ventana_regresion ]  <-  1
-
-  for( i in 2:last )  if( vector_ids[ i-1 ] !=  vector_ids[ i ] ) {  vector_desde[i] <-  i }
-  for( i in 2:last )  if( vector_desde[i] < vector_desde[i-1] )  {  vector_desde[i] <-  vector_desde[i-1] }
-
-  for(  campo  in   cols )
-  {
-    nueva_col     <- fhistC( dataset[ , get(campo) ], vector_desde ) 
-
-    if(tendencia)  dataset[ , paste0( campo, "_tend", ventana) := nueva_col[ (0*last +1):(1*last) ]  ]
-    if(minimo)     dataset[ , paste0( campo, "_min", ventana)  := nueva_col[ (1*last +1):(2*last) ]  ]
-    if(maximo)     dataset[ , paste0( campo, "_max", ventana)  := nueva_col[ (2*last +1):(3*last) ]  ]
-    if(promedio)   dataset[ , paste0( campo, "_avg", ventana)  := nueva_col[ (3*last +1):(4*last) ]  ]
-    if(ratioavg)   dataset[ , paste0( campo, "_ratioavg", ventana)  := get(campo) /nueva_col[ (3*last +1):(4*last) ]  ]
-    if(ratiomax)   dataset[ , paste0( campo, "_ratiomax", ventana)  := get(campo) /nueva_col[ (2*last +1):(3*last) ]  ]
-  }
-
-}
-#------------------------------------------------------------------------------
-#calcula la tendencia de las variables cols de los ultimos 12 meses
-#la tendencia es la pendiente de la recta que ajusta por cuadrados minimos
-#La funcionalidad de ratioavg es autoria de  Daiana Sparta,  UAustral  2021
-
-TendenciaYmuchomas12  <- function( dataset, cols, ventana=12, tendencia=TRUE, minimo=TRUE, maximo=TRUE, promedio=TRUE, 
-                                 ratioavg=FALSE, ratiomax=FALSE)
-{
-  gc()
-  #Esta es la cantidad de meses que utilizo para la historia
-  ventana_regresion  <- ventana
-  
-  last  <- nrow( dataset )
-  
-  #creo el vector_desde que indica cada ventana
-  #de esta forma se acelera el procesamiento ya que lo hago una sola vez
-  vector_ids   <- dataset$numero_de_cliente
-  
-  vector_desde  <- seq( -ventana_regresion+2,  nrow(dataset)-ventana_regresion+1 )
-  vector_desde[ 1:ventana_regresion ]  <-  1
-  
-  for( i in 2:last )  if( vector_ids[ i-1 ] !=  vector_ids[ i ] ) {  vector_desde[i] <-  i }
-  for( i in 2:last )  if( vector_desde[i] < vector_desde[i-1] )  {  vector_desde[i] <-  vector_desde[i-1] }
-  
-  for(  campo  in   cols )
-  {
-    nueva_col     <- fhistC( dataset[ , get(campo) ], vector_desde ) 
-    
-    if(tendencia)  dataset[ , paste0( campo, "_tend", ventana) := nueva_col[ (0*last +1):(1*last) ]  ]
-    if(minimo)     dataset[ , paste0( campo, "_min", ventana)  := nueva_col[ (1*last +1):(2*last) ]  ]
-    if(maximo)     dataset[ , paste0( campo, "_max", ventana)  := nueva_col[ (2*last +1):(3*last) ]  ]
-    if(promedio)   dataset[ , paste0( campo, "_avg", ventana)  := nueva_col[ (3*last +1):(4*last) ]  ]
-    if(ratioavg)   dataset[ , paste0( campo, "_ratioavg", ventana)  := get(campo) /nueva_col[ (3*last +1):(4*last) ]  ]
-    if(ratiomax)   dataset[ , paste0( campo, "_ratiomax", ventana)  := get(campo) /nueva_col[ (2*last +1):(3*last) ]  ]
-  }
-  
-}
-#------------------------------------------------------------------------------
-#calcula la tendencia de las variables cols de los ultimos 18 meses
-#la tendencia es la pendiente de la recta que ajusta por cuadrados minimos
-#La funcionalidad de ratioavg es autoria de  Daiana Sparta,  UAustral  2021
-
-TendenciaYmuchomas18  <- function( dataset, cols, ventana=18, tendencia=TRUE, minimo=TRUE, maximo=TRUE, promedio=TRUE, 
-                                   ratioavg=FALSE, ratiomax=FALSE)
 {
   gc()
   #Esta es la cantidad de meses que utilizo para la historia
@@ -675,63 +576,11 @@ if( PARAM$variablesmanuales )  AgregarVariables( dataset )
 
 cols_lagueables  <- copy( setdiff( colnames(dataset), PARAM$const$campos_fijos ) )
 
-if( PARAM$tendenciaYmuchomas3$correr ) 
+if( PARAM$tendenciaYmuchomas$correr ) 
 {
-  p  <- PARAM$tendenciaYmuchomas3
+  p  <- PARAM$tendenciaYmuchomas
   
-  TendenciaYmuchomas3( dataset, 
-                       cols= cols_lagueables,
-                       ventana=   p$ventana,
-                       tendencia= p$tendencia,
-                       minimo=    p$minimo,
-                       maximo=    p$maximo,
-                       promedio=  p$promedio,
-                       ratioavg=  p$ratioavg,
-                       ratiomax=  p$ratiomax
-  )
-  
-}
-
-if( PARAM$tendenciaYmuchomas6$correr ) 
-{
-  p  <- PARAM$tendenciaYmuchomas6
-
-  TendenciaYmuchomas6( dataset, 
-                      cols= cols_lagueables,
-                      ventana=   p$ventana,
-                      tendencia= p$tendencia,
-                      minimo=    p$minimo,
-                      maximo=    p$maximo,
-                      promedio=  p$promedio,
-                      ratioavg=  p$ratioavg,
-                      ratiomax=  p$ratiomax
-                    )
-
-}
-
-
-if( PARAM$tendenciaYmuchomas12$correr ) 
-{
-  p  <- PARAM$tendenciaYmuchomas12
-  
-  TendenciaYmuchomas12( dataset, 
-                       cols= cols_lagueables,
-                       ventana=   p$ventana,
-                       tendencia= p$tendencia,
-                       minimo=    p$minimo,
-                       maximo=    p$maximo,
-                       promedio=  p$promedio,
-                       ratioavg=  p$ratioavg,
-                       ratiomax=  p$ratiomax
-  )
-  
-}
-
-if( PARAM$tendenciaYmuchomas18$correr ) 
-{
-  p  <- PARAM$tendenciaYmuchomas18
-  
-  TendenciaYmuchomas18( dataset, 
+  TendenciaYmuchomas( dataset, 
                        cols= cols_lagueables,
                        ventana=   p$ventana,
                        tendencia= p$tendencia,
