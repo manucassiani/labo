@@ -252,6 +252,26 @@ AgregarVariables  <- function( dataset )
   dataset[ , mvr_mpagominimo         := mv_mpagominimo  / mv_mlimitecompra ]
 
   #Aqui debe usted agregar sus propias nuevas variables
+  
+  # 85 variables para hacer interacciones
+  campos_buenos = c("cliente_vip","internet","cliente_edad","cliente_antiguedad","mrentabilidad","mrentabilidad_annual","mcomisiones","mactivos_margen","mpasivos_margen","cproductos",
+                    "mcuenta_corriente_adicional","mcuenta_corriente","mcaja_ahorro","mcaja_ahorro_adicional","mcaja_ahorro_dolares","mdescubierto_preacordado","mcuentas_saldo","ctarjeta_debito_trx","mautoservicio","ctarjeta_visa",
+                    "ctarjeta_visa_trx","mtarjeta_visa_consumo","ctarjeta_master_trx","mtarjeta_master_consumo","cprestamos_personales","mprestamos_personales","mprestamos_prendarios","mprestamos_hipotecarios","cplazo_fijo","mplazo_fijo_dolares",
+                    "cseguro_vida","cseguro_accidentes_personales","ccaja_seguridad","cpayroll_trx","mpayroll","ccuenta_debitos_automaticos","mcuenta_debitos_automaticos","ctarjeta_visa_debitos_automaticos","mtarjeta_visa_debitos_automaticos","mttarjeta_master_debitos_automaticos",
+                    "mpagomiscuentas","ctarjeta_visa_descuentos","mtarjeta_visa_descuentos","ccomisiones_mantenimiento","mcomisiones_mantenimiento","ccomisiones_otras","mcomisiones_otras","mforex_sell","ctransferencias_recibidas","mtransferencias_recibidas",
+                    "ctransferencias_emitidas","mtransferencias_emitidas","cextraccion_autoservicio","mextraccion_autoservicio","mcheques_depositados","tcallcenter","ccallcenter_trx","thomebanking","chomebanking_trx","ccajas_trx",
+                    "ccajas_consultas","ctrx_quarter","tmobile_app","cmobile_app_trx","Master_mfinanciacion_limite","Master_msaldototal","Master_status","Master_mlimitecompra","Master_fultimo_cierre","Master_mpagado",
+                    "Master_fechaalta","Master_mpagominimo","Visa_msaldototal","Visa_Finiciomora","Visa_mfinanciacion_limite","Visa_msaldopesos","Visa_mconsumospesos","Visa_mconsumosdolares","Visa_mlimitecompra","Visa_fultimo_cierre",
+                    "Visa_mpagado","Visa_mpagospesos","Visa_fechaalta","Visa_cconsumos","Visa_mpagominimo")
+  
+  all_interactions = combn(campos_buenos, 2)
+  for (position in seq(length(all_interactions)/2))
+  {
+    col1 = all_interactions[,position][1]
+    col2 = all_interactions[,position][2]
+    col_name = paste(col1,col2,sep="_PROD_")
+    dataset[ , toString(col_name)      := as.numeric(gsub(",",".",get(col1),fixed=TRUE)) * as.numeric(gsub(",",".",get(col2),fixed=TRUE)) ]
+  }  
 
   #valvula de seguridad para evitar valores infinitos
   #paso los infinitos a NULOS
@@ -541,7 +561,7 @@ Rankeador  <- function( cols )
 #------------------------------------------------------------------------------
 #Aqui empieza el programa
 
-setwd( "~/buckets/b1/datasets/" )
+setwd( "/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT/labo" )
 
 #cargo el dataset
 dataset   <- fread( "paquete_premium.csv.gz" )
