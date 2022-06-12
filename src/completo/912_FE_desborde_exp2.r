@@ -248,6 +248,14 @@ AgregarVariables  <- function( dataset )
   dataset[ , mvr_mpagominimo         := mv_mpagominimo  / mv_mlimitecompra ]
 
   #Aqui debe usted agregar sus propias nuevas variables
+  all_interactions = combn(names(dataset), 2)  
+  for (position in seq(length(all_interactions)/2))
+  {
+    col1 = all_interactions[,position][1]
+    col2 = all_interactions[,position][2]
+    col_name = paste(col1,col2,sep="_VS_")
+    dataset[ , toString(col_name)      := as.numeric(gsub(",",".",get(col1),fixed=TRUE)) * as.numeric(gsub(",",".",get(col2),fixed=TRUE)) ]
+  }  
   
   #valvula de seguridad para evitar valores infinitos
   #paso los infinitos a NULOS
