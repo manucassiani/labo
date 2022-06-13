@@ -21,9 +21,19 @@ param:
   
   acumulavars: TRUE   #a lo nuevo lo va aplicando
 
-  tendenciaYmuchomas6: 
+  tendenciaYmuchomas4: 
     correr: TRUE #Great power comes with great responsability
-    ventana: 6
+    ventana: 4
+    tendencia: TRUE
+    minimo:    TRUE
+    maximo:    TRUE
+    promedio:  TRUE
+    ratioavg:  TRUE
+    ratiomax:  TRUE
+    
+  tendenciaYmuchomas9: 
+    correr: TRUE #Great power comes with great responsability
+    ventana: 9
     tendencia: TRUE
     minimo:    TRUE
     maximo:    TRUE
@@ -31,9 +41,19 @@ param:
     ratioavg:  TRUE
     ratiomax:  TRUE
 
-  tendenciaYmuchomas12: 
+  tendenciaYmuchomas15: 
     correr: TRUE #Great power comes with great responsability
-    ventana: 12
+    ventana: 15
+    tendencia: TRUE
+    minimo:    TRUE
+    maximo:    TRUE
+    promedio:  TRUE
+    ratioavg:  TRUE
+    ratiomax:  TRUE        
+
+  tendenciaYmuchomas18: 
+    correr: TRUE #Great power comes with great responsability
+    ventana: 18
     tendencia: TRUE
     minimo:    TRUE
     maximo:    TRUE
@@ -42,9 +62,9 @@ param:
     ratiomax:  TRUE
 
   #lags y sus deltas , 6 posiciones
-  lag:   [ FALSE, TRUE, TRUE, FALSE, FALSE, FALSE ]
-  delta: [ FALSE, TRUE, TRUE, FALSE, FALSE, FALSE ]
-  canaritosratio: [ 1, 0.2, 0.2, 1, 1, 1 ]
+  lag:   [ TRUE, TRUE, TRUE, TRUE, TRUE, TRUE ]
+  delta: [ TRUE, TRUE, TRUE, TRUE, TRUE, TRUE ]
+  canaritosratio: [ 0.2, 0.2, 0.2, 0.2, 0.2, 0.2 ]
 
   tony:  TRUE
 
