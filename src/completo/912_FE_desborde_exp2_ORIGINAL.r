@@ -1,3 +1,7 @@
+# realiza Feature Engineering sobre el dataset original
+# Este script con seguridad va a ser modificado por los alumnos
+# para agregar su propio FE, al menos en la funcion AgregarVariables
+
 #Necesita para correr en Google Cloud
 #256 GB de memoria RAM
 #300 GB de espacio en el disco local
@@ -10,44 +14,40 @@ gc()             #garbage collection
 
 require("data.table")
 require("Rcpp")
+require("rlist")
+require("yaml")
 
 require("lightgbm")
 
-options(error = function() { 
-  traceback(20); 
-  options(error = NULL); 
-  stop("exiting after script error") 
-})
-
-kdataset_salida  <- "paquete_premium_ext_202001_prueba.csv"
-kcampos_fijos  <- c( "numero_de_cliente", "clase_ternaria", "foto_mes" )
+source( "~/labo/src/lib/exp_lib.r" )
 
 #------------------------------------------------------------------------------
 
 ReportarCampos  <- function( dataset )
 {
-  cat( deparse(sys.calls()[[sys.nframe()-1]]),  #el nombre de la funcion desde donde se llamo
-       "La cantidad de campos es ", 
-       ncol(dataset) ,
-       "\n" )
+  cat( "La cantidad de campos es ", ncol(dataset) , "\n" )
 }
 #------------------------------------------------------------------------------
 #Agrega al dataset una variable que va de 1 a 12, el mes, para que el modelo aprenda estacionalidad
 
 AgregarMes  <- function( dataset )
 {
+  print("Comienzo AgregarMes")
   gc()
   dataset[  , mes := foto_mes %% 100 ]
   ReportarCampos( dataset )
+  print("Fin AgregarMes")
 }
 #------------------------------------------------------------------------------
 #Elimina las variables que uno supone hace Data Drifting
 
 DriftEliminar  <- function( dataset, variables )
 {
+  print("Comienzo DriftEliminar")
   gc()
   dataset[  , c(variables) := NULL ]
   ReportarCampos( dataset )
+  print("Fin DriftEliminar")
 }
 #------------------------------------------------------------------------------
 #Autor:  Santiago Dellachiesa, UAustral 2021
@@ -55,20 +55,23 @@ DriftEliminar  <- function( dataset, variables )
 
 DummiesNA  <- function( dataset )
 {
+  print("Comienzo DummiesNA")
   gc()
-  nulos  <- colSums( is.na(dataset[ foto_mes %in% 202101 ]) )  #cuento la cantidad de nulos por columna
+  nulos  <- colSums( is.na(dataset[ foto_mes %in% PARAM$const$futuro ]) )  #cuento la cantidad de nulos por columna
   colsconNA  <- names( which(  nulos > 0 ) )
 
   dataset[ , paste0( colsconNA, "_isNA") :=  lapply( .SD,  is.na ),
              .SDcols= colsconNA]
-
+  
   ReportarCampos( dataset )
+  print("Fin DummiesNA")
 }
 #------------------------------------------------------------------------------
 #Corrige poniendo a NA las variables que en ese mes estan dañadas
 
 Corregir  <- function( dataset )
 {
+  print("Comienzo Corregir")  
   gc()
   #acomodo los errores del dataset
 
@@ -175,12 +178,14 @@ Corregir  <- function( dataset )
   dataset[ foto_mes==202101,  tmobile_app  := NA ]
 
   ReportarCampos( dataset )
+  print("Fin Corregir")  
 }
 #------------------------------------------------------------------------------
 #Esta es la parte que los alumnos deben desplegar todo su ingenio
 
 AgregarVariables  <- function( dataset )
 {
+  print("Comienzo AgregarVariables")   
   gc()
   #INICIO de la seccion donde se deben hacer cambios con variables nuevas
 
@@ -250,13 +255,21 @@ AgregarVariables  <- function( dataset )
   dataset[ , mvr_mpagosdolares       := mv_mpagosdolares / mv_mlimitecompra ]
   dataset[ , mvr_mconsumototal       := mv_mconsumototal  / mv_mlimitecompra ]
   dataset[ , mvr_mpagominimo         := mv_mpagominimo  / mv_mlimitecompra ]
-
+  
   #Aqui debe usted agregar sus propias nuevas variables
   
+  print("Comienzo Prod Variables")
   # 85 variables para hacer interacciones
   campos_buenos = c("cliente_vip","internet","cliente_edad","cliente_antiguedad","mrentabilidad","mrentabilidad_annual","mcomisiones","mactivos_margen","mpasivos_margen","cproductos",
-                    "mcuenta_corriente_adicional","mcuenta_corriente","mcaja_ahorro","mcaja_ahorro_adicional","mcaja_ahorro_dolares","mdescubierto_preacordado","mcuentas_saldo","ctarjeta_debito_trx","mautoservicio","ctarjeta_visa")
-  
+                    "mcuenta_corriente_adicional","mcuenta_corriente","mcaja_ahorro","mcaja_ahorro_adicional","mcaja_ahorro_dolares","mdescubierto_preacordado","mcuentas_saldo","ctarjeta_debito_trx","mautoservicio","ctarjeta_visa",
+                    "ctarjeta_visa_trx","mtarjeta_visa_consumo","ctarjeta_master_trx","mtarjeta_master_consumo","cprestamos_personales","mprestamos_personales","mprestamos_prendarios","mprestamos_hipotecarios","cplazo_fijo","mplazo_fijo_dolares",
+                    "cseguro_vida","cseguro_accidentes_personales","ccaja_seguridad","cpayroll_trx","mpayroll","ccuenta_debitos_automaticos","mcuenta_debitos_automaticos","ctarjeta_visa_debitos_automaticos","mtarjeta_visa_debitos_automaticos","mttarjeta_master_debitos_automaticos",
+                    "mpagomiscuentas","ctarjeta_visa_descuentos","mtarjeta_visa_descuentos","ccomisiones_mantenimiento","mcomisiones_mantenimiento","ccomisiones_otras","mcomisiones_otras","mforex_sell","ctransferencias_recibidas","mtransferencias_recibidas",
+                    "ctransferencias_emitidas","mtransferencias_emitidas","cextraccion_autoservicio","mextraccion_autoservicio","mcheques_depositados","tcallcenter","ccallcenter_trx","thomebanking","chomebanking_trx","ccajas_trx",
+                    "ccajas_consultas","ctrx_quarter","tmobile_app","cmobile_app_trx","Master_mfinanciacion_limite","Master_msaldototal","Master_status","Master_mlimitecompra","Master_fultimo_cierre","Master_mpagado",
+                    "Master_fechaalta","Master_mpagominimo","Visa_msaldototal","Visa_Finiciomora","Visa_mfinanciacion_limite","Visa_msaldopesos","Visa_mconsumospesos","Visa_mconsumosdolares","Visa_mlimitecompra","Visa_fultimo_cierre",
+                    "Visa_mpagado","Visa_mpagospesos","Visa_fechaalta","Visa_cconsumos","Visa_mpagominimo")
+
   all_interactions = combn(campos_buenos, 2)
   for (position in seq(length(all_interactions)/2))
   {
@@ -265,7 +278,7 @@ AgregarVariables  <- function( dataset )
     col_name = paste(col1,col2,sep="_PROD_")
     dataset[ , toString(col_name)      := as.numeric(gsub(",",".",get(col1),fixed=TRUE)) * as.numeric(gsub(",",".",get(col2),fixed=TRUE)) ]
   }  
-
+  
   #valvula de seguridad para evitar valores infinitos
   #paso los infinitos a NULOS
   infinitos      <- lapply(names(dataset),function(.name) dataset[ , sum(is.infinite(get(.name)))])
@@ -275,8 +288,8 @@ AgregarVariables  <- function( dataset )
     cat( "ATENCION, hay", infinitos_qty, "valores infinitos en tu dataset. Seran pasados a NA\n" )
     dataset[mapply(is.infinite, dataset)] <<- NA
   }
-
-
+  
+  
   #valvula de seguridad para evitar valores NaN  que es 0/0
   #paso los NaN a 0 , decision polemica si las hay
   #se invita a asignar un valor razonable segun la semantica del campo creado
@@ -287,9 +300,10 @@ AgregarVariables  <- function( dataset )
     cat( "ATENCION, hay", nans_qty, "valores NaN 0/0 en tu dataset. Seran pasados arbitrariamente a 0\n" )
     cat( "Si no te gusta la decision, modifica a gusto el programa!\n\n")
     dataset[mapply(is.nan, dataset)] <<- 0
-  }
+  }  
 
   ReportarCampos( dataset )
+  print("Fin Prod variables")
 }
 #------------------------------------------------------------------------------
 #esta funcion supone que dataset esta ordenado por   <numero_de_cliente, foto_mes>
@@ -297,6 +311,7 @@ AgregarVariables  <- function( dataset )
 
 Lags  <- function( cols, nlag, deltas )
 {
+  print("Comienzo Lags")
   gc()
   sufijo  <- paste0( "_lag", nlag )
 
@@ -314,8 +329,9 @@ Lags  <- function( cols, nlag, deltas )
      dataset[,  paste0(vcol, sufijodelta) := get( vcol)  - get(paste0( vcol, sufijo))]
     }
   }
-
+  
   ReportarCampos( dataset )
+  print("Fin Lags")  
 }
 #------------------------------------------------------------------------------
 #se calculan para los 6 meses previos el minimo, maximo y tendencia calculada con cuadrados minimos
@@ -392,35 +408,34 @@ cppFunction('NumericVector fhistC(NumericVector pcolumna, IntegerVector pdesde )
 
   return  out;
 }')
-
 #------------------------------------------------------------------------------
-#calcula la tendencia de las variables cols de los ultimos 6 meses
+#calcula la tendencia de las variables cols de los ultimos 3 meses
 #la tendencia es la pendiente de la recta que ajusta por cuadrados minimos
 #La funcionalidad de ratioavg es autoria de  Daiana Sparta,  UAustral  2021
 
-TendenciaYmuchomas  <- function( dataset, cols, ventana=6, tendencia=TRUE, minimo=TRUE, maximo=TRUE, promedio=TRUE, 
-                                 ratioavg=FALSE, ratiomax=FALSE)
+TendenciaYmuchomas  <- function( dataset, cols, ventana=3, tendencia=TRUE, minimo=TRUE, maximo=TRUE, promedio=TRUE, 
+                                  ratioavg=FALSE, ratiomax=FALSE)
 {
   gc()
   #Esta es la cantidad de meses que utilizo para la historia
   ventana_regresion  <- ventana
-
+  
   last  <- nrow( dataset )
-
+  
   #creo el vector_desde que indica cada ventana
   #de esta forma se acelera el procesamiento ya que lo hago una sola vez
   vector_ids   <- dataset$numero_de_cliente
-
+  
   vector_desde  <- seq( -ventana_regresion+2,  nrow(dataset)-ventana_regresion+1 )
   vector_desde[ 1:ventana_regresion ]  <-  1
-
+  
   for( i in 2:last )  if( vector_ids[ i-1 ] !=  vector_ids[ i ] ) {  vector_desde[i] <-  i }
   for( i in 2:last )  if( vector_desde[i] < vector_desde[i-1] )  {  vector_desde[i] <-  vector_desde[i-1] }
-
+  
   for(  campo  in   cols )
   {
     nueva_col     <- fhistC( dataset[ , get(campo) ], vector_desde ) 
-
+    
     if(tendencia)  dataset[ , paste0( campo, "_tend", ventana) := nueva_col[ (0*last +1):(1*last) ]  ]
     if(minimo)     dataset[ , paste0( campo, "_min", ventana)  := nueva_col[ (1*last +1):(2*last) ]  ]
     if(maximo)     dataset[ , paste0( campo, "_max", ventana)  := nueva_col[ (2*last +1):(3*last) ]  ]
@@ -428,10 +443,26 @@ TendenciaYmuchomas  <- function( dataset, cols, ventana=6, tendencia=TRUE, minim
     if(ratioavg)   dataset[ , paste0( campo, "_ratioavg", ventana)  := get(campo) /nueva_col[ (3*last +1):(4*last) ]  ]
     if(ratiomax)   dataset[ , paste0( campo, "_ratiomax", ventana)  := get(campo) /nueva_col[ (2*last +1):(3*last) ]  ]
   }
-
-  ReportarCampos( dataset )
+  
 }
 #------------------------------------------------------------------------------
+#Autor: Antonio Velazquez Bustamente,  UBA 2021
+
+Tony  <- function( cols )
+{
+  print("Comienzo Tony")
+  sufijo  <- paste0( "_tony")
+
+  dataset[ , paste0( cols, sufijo) := lapply( .SD,  function(x){ x/mean(x, na.rm=TRUE)} ), 
+             by= foto_mes, 
+             .SDcols= cols]
+  
+
+  ReportarCampos( dataset )
+  print("Fin Tony")  
+}
+#------------------------------------------------------------------------------
+
 VPOS_CORTE  <- c()
 
 fganancia_lgbm_meseta  <- function(probs, datos) 
@@ -465,6 +496,7 @@ GVEZ <- 1
 CanaritosImportancia  <- function( canaritos_ratio=0.2 )
 {
   gc()
+  print("Comienzo Canaritos Importancia")
   ReportarCampos( dataset )
   dataset[ , clase01:= ifelse( clase_ternaria=="CONTINUA", 0, 1 ) ]
 
@@ -533,98 +565,90 @@ CanaritosImportancia  <- function( canaritos_ratio=0.2 )
   dataset[  ,  (col_inutiles) := NULL ]
 
   ReportarCampos( dataset )
+  print("Fin Canaritos Importancia")
 }
-#------------------------------------------------------------------------------
-#calcula el ranking de la funcion
-
-Rankeador  <- function( cols )
-{
-  gc()
-  sufijo  <- "_rank" 
-
-  for( vcol in cols )
-  {
-     dataset[ , paste0( vcol, sufijo) := frank( get(vcol), ties.method= "random")/ .N, 
-                by= foto_mes ]
-  }
-
-  ReportarCampos( dataset )
-}
-#------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #Aqui empieza el programa
 
-setwd( "/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT/datasets/" )
+exp_iniciar( )
 
 #cargo el dataset
-dataset   <- fread( "paquete_premium_202011.csv", nrows=10000)
+nom_arch  <- exp_nombre_archivo( PARAM$files$input$dentrada )
+dataset   <- fread( nom_arch )
 
 #ordeno el dataset por <numero_de_cliente, foto_mes> para poder hacer lags
-setorder( dataset, numero_de_cliente, foto_mes )
+setorderv( dataset, PARAM$const$campos_sort )
 
+AgregarMes( dataset )  #agrego el mes del año
 
-AgregarMes( dataset )  #agrego el mes del año  1,2 3,..,12
+if( PARAM$dummiesNA )  DummiesNA( dataset )  #esta linea debe ir ANTES de Corregir  !!
 
-DummiesNA( dataset )  #esta linea debe ir ANTES de Corregir  !!
+if( PARAM$corregir )  Corregir( dataset )  #esta linea debe ir DESPUES de  DummiesNA
 
-Corregir( dataset )  #esta linea debe ir DESPUES de  DummiesNA
-
-#Comentar si no se quiera que funcione
-AgregarVariables( dataset )
+if( PARAM$variablesmanuales )  AgregarVariables( dataset )
 
 
 #--------------------------------------
 #Esta primera parte es muuuy  artesanal  y discutible  ya que hay multiples formas de hacerlo
 
-cols_lagueables  <- copy( setdiff( colnames(dataset), kcampos_fijos ) )
+cols_lagueables  <- copy( setdiff( colnames(dataset), PARAM$const$campos_fijos ) )
 
-#Rankea las variables dentro de cada mes
-setorder( dataset, foto_mes, numero_de_cliente )
-Rankeador( cols_lagueables )
-setorder( dataset, numero_de_cliente, foto_mes )
+if( PARAM$tendenciaYmuchomas$correr ) 
+{
+  p  <- PARAM$tendenciaYmuchomas
+  
+  TendenciaYmuchomas( dataset, 
+                       cols= cols_lagueables,
+                       ventana=   p$ventana,
+                       tendencia= p$tendencia,
+                       minimo=    p$minimo,
+                       maximo=    p$maximo,
+                       promedio=  p$promedio,
+                       ratioavg=  p$ratioavg,
+                       ratiomax=  p$ratiomax
+  )
+  
+}
 
-#reduciendo la cantidad de atributos
-#comentar si no se quiere que corra
-CanaritosImportancia()
-cols_lagueables  <- intersect( cols_lagueables,  colnames(dataset) )
+for( i in 1:length( PARAM$lag ) )
+{
+  if( PARAM$lag[i] )
+  {
+    #veo si tengo que ir agregando variables
+    if( PARAM$acumulavars )  cols_lagueables  <- setdiff( colnames(dataset), PARAM$const$campos_fijos )
 
-#reacomodo las cols_lagueables ya que muchas de las originales han desaparecido
-cols_lagueables  <- intersect( cols_lagueables,  colnames(dataset) )
+    cols_lagueables  <- intersect( colnames(dataset), cols_lagueables )
+    Lags( cols_lagueables, i, PARAM$delta[ i ] )   #calculo los lags de orden  i
 
-#calculos varios
-TendenciaYmuchomas( dataset, 
-                    cols= cols_lagueables,
-                    ventana=  6,
-                    tendencia= TRUE,
-                    minimo=    FALSE,
-                    maximo=    FALSE,
-                    promedio=  TRUE,
-                    ratioavg=  FALSE,
-                    ratiomax=  FALSE
-                  )
+    #elimino las variables poco importantes, para hacer lugar a las importantes
+    if( PARAM$canaritosratio[ i ] > 0 )  CanaritosImportancia( canaritos_ratio= unlist(PARAM$canaritosratio[ i ]) )
+  }
+}
 
-
-#Comentar si no se quiera que funcione
-Lags( cols_lagueables, 1, TRUE )   #calculo los lags de orden  i
-
-#Aqui se podrian descomentar
-#Lags( cols_lagueables, 1, TRUE )   #calculo los lags de orden  i
-
-#reduciendo la cantidad de atributos
-#comentar si no se quiere que corra
-CanaritosImportancia()
-cols_lagueables  <- intersect( cols_lagueables,  colnames(dataset) )
 
 
 #dejo la clase como ultimo campo
-nuevo_orden  <- c( setdiff( colnames( dataset ) , "clase_ternaria" ) , "clase_ternaria" )
+nuevo_orden  <- c( setdiff( colnames( dataset ) , PARAM$const$clase ) , PARAM$const$clase )
 setcolorder( dataset, nuevo_orden )
 
 
-#Grabo el dataset
+#Grabo el dataset    https://www.youtube.com/watch?v=66CP-pq7Cx0
 fwrite( dataset,
-        kdataset_salida,
+        paste0( PARAM$files$output ),
         logical01= TRUE,
         sep= "," )
 
 
+
+# grabo catalogo   ------------------------------------------------------------
+# es lo ultimo que hago, indica que llegue a generar la salida
+#no todos los archivos generados pasan al catalogo
+
+exp_catalog_add( action= "FE",
+                 type=   "file",
+                 key=    "dataset",
+                 value = PARAM$files$output )
+
+#finalizo el experimento
+#HouseKeeping
+exp_finalizar( )
