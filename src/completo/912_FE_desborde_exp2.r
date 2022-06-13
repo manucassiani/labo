@@ -256,29 +256,6 @@ AgregarVariables  <- function( dataset )
   dataset[ , mvr_mconsumototal       := mv_mconsumototal  / mv_mlimitecompra ]
   dataset[ , mvr_mpagominimo         := mv_mpagominimo  / mv_mlimitecompra ]
   
-  #valvula de seguridad para evitar valores infinitos
-  #paso los infinitos a NULOS
-  infinitos      <- lapply(names(dataset),function(.name) dataset[ , sum(is.infinite(get(.name)))])
-  infinitos_qty  <- sum( unlist( infinitos) )
-  if( infinitos_qty > 0 )
-  {
-    cat( "ATENCION, hay", infinitos_qty, "valores infinitos en tu dataset. Seran pasados a NA\n" )
-    dataset[mapply(is.infinite, dataset)] <<- NA
-  }
-  
-  
-  #valvula de seguridad para evitar valores NaN  que es 0/0
-  #paso los NaN a 0 , decision polemica si las hay
-  #se invita a asignar un valor razonable segun la semantica del campo creado
-  nans      <- lapply(names(dataset),function(.name) dataset[ , sum(is.nan(get(.name)))])
-  nans_qty  <- sum( unlist( nans) )
-  if( nans_qty > 0 )
-  {
-    cat( "ATENCION, hay", nans_qty, "valores NaN 0/0 en tu dataset. Seran pasados arbitrariamente a 0\n" )
-    cat( "Si no te gusta la decision, modifica a gusto el programa!\n\n")
-    dataset[mapply(is.nan, dataset)] <<- 0
-  }  
-
   #Aqui debe usted agregar sus propias nuevas variables
   
   print("Comienzo Prod Variables")
@@ -311,6 +288,19 @@ AgregarVariables  <- function( dataset )
     cat( "ATENCION, hay", infinitos_qty, "valores infinitos en tu dataset. Seran pasados a NA\n" )
     dataset[mapply(is.infinite, dataset)] <<- NA
   }
+  
+  
+  #valvula de seguridad para evitar valores NaN  que es 0/0
+  #paso los NaN a 0 , decision polemica si las hay
+  #se invita a asignar un valor razonable segun la semantica del campo creado
+  nans      <- lapply(names(dataset),function(.name) dataset[ , sum(is.nan(get(.name)))])
+  nans_qty  <- sum( unlist( nans) )
+  if( nans_qty > 0 )
+  {
+    cat( "ATENCION, hay", nans_qty, "valores NaN 0/0 en tu dataset. Seran pasados arbitrariamente a 0\n" )
+    cat( "Si no te gusta la decision, modifica a gusto el programa!\n\n")
+    dataset[mapply(is.nan, dataset)] <<- 0
+  }  
 
   ReportarCampos( dataset )
   print("Fin Prod variables")
