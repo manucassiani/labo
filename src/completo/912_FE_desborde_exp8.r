@@ -256,31 +256,6 @@ AgregarVariables  <- function( dataset )
   dataset[ , mvr_mconsumototal       := mv_mconsumototal  / mv_mlimitecompra ]
   dataset[ , mvr_mpagominimo         := mv_mpagominimo  / mv_mlimitecompra ]
   
-  #Aqui debe usted agregar sus propias nuevas variables
-  
-  print("Comienzo Prod Variables")
-  # 50 variables para hacer interacciones
-  campos_buenos = c("internet","cliente_edad","cliente_antiguedad","mrentabilidad","mrentabilidad_annual","mcomisiones","mactivos_margen","mpasivos_margen","cproductos","mcuenta_corriente",
-                    "mcaja_ahorro","mcaja_ahorro_dolares","mdescubierto_preacordado","mcuentas_saldo","ctarjeta_debito_trx","ctarjeta_visa", #16
-                    
-                    "ctarjeta_visa_trx","mtarjeta_visa_consumo","mtarjeta_master_consumo","cprestamos_personales","mprestamos_personales","mplazo_fijo_dolares","mpayroll","mcuenta_debitos_automaticos","mtarjeta_visa_debitos_automaticos","mpagomiscuentas",
-                    "ccomisiones_mantenimiento","mcomisiones_mantenimiento","ccomisiones_otras", #13
-                    
-                    "Master_fultimo_cierre","Master_fechaalta","Visa_fultimo_cierre","Visa_fechaalta",
-                    
-                    "ctransferencias_recibidas","mtransferencias_recibidas","mtransferencias_emitidas","ccallcenter_trx","chomebanking_trx","ctrx_quarter","cmobile_app_trx","Master_mpagominimo","Visa_msaldototal","Visa_mfinanciacion_limite",
-                    "Visa_msaldopesos","Visa_mlimitecompra","Visa_mpagospesos","Visa_cconsumos","Visa_mpagominimo" #15
-                   )
-
-  all_interactions = combn(campos_buenos, 2)
-  for (position in seq(length(all_interactions)/2))
-  {
-    col1 = all_interactions[,position][1]
-    col2 = all_interactions[,position][2]
-    col_name = paste(col1,col2,sep="_PROD_")
-    dataset[ , toString(col_name)      := as.numeric(gsub(",",".",get(col1),fixed=TRUE)) * as.numeric(gsub(",",".",get(col2),fixed=TRUE)) ]
-  }  
-
   #valvula de seguridad para evitar valores infinitos
   #paso los infinitos a NULOS
   infinitos      <- lapply(names(dataset),function(.name) dataset[ , sum(is.infinite(get(.name)))])
@@ -303,6 +278,31 @@ AgregarVariables  <- function( dataset )
     cat( "Si no te gusta la decision, modifica a gusto el programa!\n\n")
     dataset[mapply(is.nan, dataset)] <<- 0
   }   
+  
+  #Aqui debe usted agregar sus propias nuevas variables
+  
+  print("Comienzo Prod Variables")
+  # 48 variables para hacer interacciones
+  campos_buenos = c("internet","cliente_edad","cliente_antiguedad","mrentabilidad","mrentabilidad_annual","mcomisiones","mactivos_margen","mpasivos_margen","cproductos","mcuenta_corriente",
+                    "mcaja_ahorro","mcaja_ahorro_dolares","mdescubierto_preacordado","mcuentas_saldo","ctarjeta_debito_trx","ctarjeta_visa", #16
+                    
+                    "ctarjeta_visa_trx","mtarjeta_visa_consumo","mtarjeta_master_consumo","cprestamos_personales","mprestamos_personales","mplazo_fijo_dolares","mpayroll","mcuenta_debitos_automaticos","mtarjeta_visa_debitos_automaticos","mpagomiscuentas",
+                    "ccomisiones_mantenimiento","mcomisiones_mantenimiento","ccomisiones_otras", #13
+                    
+                    "Master_fultimo_cierre","Master_fechaalta","Visa_fultimo_cierre","Visa_fechaalta",
+                    
+                    "ctransferencias_recibidas","mtransferencias_recibidas","mtransferencias_emitidas","ccallcenter_trx","chomebanking_trx","ctrx_quarter","cmobile_app_trx","Master_mpagominimo","Visa_msaldototal","Visa_mfinanciacion_limite",
+                    "Visa_msaldopesos","Visa_mlimitecompra","Visa_mpagospesos","Visa_cconsumos","Visa_mpagominimo" #15
+                   )
+
+  all_interactions = combn(campos_buenos, 2)
+  for (position in seq(length(all_interactions)/2))
+  {
+    col1 = all_interactions[,position][1]
+    col2 = all_interactions[,position][2]
+    col_name = paste(col1,col2,sep="_PROD_")
+    dataset[ , toString(col_name)      := as.numeric(gsub(",",".",get(col1),fixed=TRUE)) * as.numeric(gsub(",",".",get(col2),fixed=TRUE)) ]
+  }  
   
   ReportarCampos( dataset )
   print("Fin Prod variables")
@@ -410,12 +410,51 @@ cppFunction('NumericVector fhistC(NumericVector pcolumna, IntegerVector pdesde )
 
   return  out;
 }')
+
 #------------------------------------------------------------------------------
 #calcula la tendencia de las variables cols de los ultimos 3 meses
 #la tendencia es la pendiente de la recta que ajusta por cuadrados minimos
 #La funcionalidad de ratioavg es autoria de  Daiana Sparta,  UAustral  2021
 
-TendenciaYmuchomas  <- function( dataset, cols, ventana=3, tendencia=TRUE, minimo=TRUE, maximo=TRUE, promedio=TRUE, 
+TendenciaYmuchomas3  <- function( dataset, cols, ventana=3, tendencia=TRUE, minimo=TRUE, maximo=TRUE, promedio=TRUE, 
+                                  ratioavg=FALSE, ratiomax=FALSE)
+{
+  gc()
+  #Esta es la cantidad de meses que utilizo para la historia
+  ventana_regresion  <- ventana
+  
+  last  <- nrow( dataset )
+  
+  #creo el vector_desde que indica cada ventana
+  #de esta forma se acelera el procesamiento ya que lo hago una sola vez
+  vector_ids   <- dataset$numero_de_cliente
+  
+  vector_desde  <- seq( -ventana_regresion+2,  nrow(dataset)-ventana_regresion+1 )
+  vector_desde[ 1:ventana_regresion ]  <-  1
+  
+  for( i in 2:last )  if( vector_ids[ i-1 ] !=  vector_ids[ i ] ) {  vector_desde[i] <-  i }
+  for( i in 2:last )  if( vector_desde[i] < vector_desde[i-1] )  {  vector_desde[i] <-  vector_desde[i-1] }
+  
+  for(  campo  in   cols )
+  {
+    nueva_col     <- fhistC( dataset[ , get(campo) ], vector_desde ) 
+    
+    if(tendencia)  dataset[ , paste0( campo, "_tend", ventana) := nueva_col[ (0*last +1):(1*last) ]  ]
+    if(minimo)     dataset[ , paste0( campo, "_min", ventana)  := nueva_col[ (1*last +1):(2*last) ]  ]
+    if(maximo)     dataset[ , paste0( campo, "_max", ventana)  := nueva_col[ (2*last +1):(3*last) ]  ]
+    if(promedio)   dataset[ , paste0( campo, "_avg", ventana)  := nueva_col[ (3*last +1):(4*last) ]  ]
+    if(ratioavg)   dataset[ , paste0( campo, "_ratioavg", ventana)  := get(campo) /nueva_col[ (3*last +1):(4*last) ]  ]
+    if(ratiomax)   dataset[ , paste0( campo, "_ratiomax", ventana)  := get(campo) /nueva_col[ (2*last +1):(3*last) ]  ]
+  }
+  
+}
+
+#------------------------------------------------------------------------------
+#calcula la tendencia de las variables cols de los ultimos 6 meses
+#la tendencia es la pendiente de la recta que ajusta por cuadrados minimos
+#La funcionalidad de ratioavg es autoria de  Daiana Sparta,  UAustral  2021
+
+TendenciaYmuchomas6  <- function( dataset, cols, ventana=6, tendencia=TRUE, minimo=TRUE, maximo=TRUE, promedio=TRUE, 
                                   ratioavg=FALSE, ratiomax=FALSE)
 {
   gc()
@@ -595,11 +634,11 @@ if( PARAM$variablesmanuales )  AgregarVariables( dataset )
 
 cols_lagueables  <- copy( setdiff( colnames(dataset), PARAM$const$campos_fijos ) )
 
-if( PARAM$tendenciaYmuchomas$correr ) 
+if( PARAM$tendenciaYmuchomas3$correr ) 
 {
-  p  <- PARAM$tendenciaYmuchomas
+  p  <- PARAM$tendenciaYmuchomas3
   
-  TendenciaYmuchomas( dataset, 
+  TendenciaYmuchomas3( dataset, 
                        cols= cols_lagueables,
                        ventana=   p$ventana,
                        tendencia= p$tendencia,
@@ -608,6 +647,23 @@ if( PARAM$tendenciaYmuchomas$correr )
                        promedio=  p$promedio,
                        ratioavg=  p$ratioavg,
                        ratiomax=  p$ratiomax
+  )
+  
+}
+
+if( PARAM$tendenciaYmuchoma6s$correr ) 
+{
+  p  <- PARAM$tendenciaYmuchomas6
+  
+  TendenciaYmuchomas6( dataset, 
+                      cols= cols_lagueables,
+                      ventana=   p$ventana,
+                      tendencia= p$tendencia,
+                      minimo=    p$minimo,
+                      maximo=    p$maximo,
+                      promedio=  p$promedio,
+                      ratioavg=  p$ratioavg,
+                      ratiomax=  p$ratiomax
   )
   
 }

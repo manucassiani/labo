@@ -282,7 +282,7 @@ AgregarVariables  <- function( dataset )
   #Aqui debe usted agregar sus propias nuevas variables
   
   print("Comienzo Prod Variables")
-  # 50 variables para hacer interacciones
+  # 51 variables para hacer interacciones
   campos_buenos = c("internet","cliente_edad","cliente_antiguedad","mrentabilidad","mrentabilidad_annual","mcomisiones","mactivos_margen","mpasivos_margen","cproductos","mcuenta_corriente","mcaja_ahorro",
                     "mcaja_ahorro_dolares","mdescubierto_preacordado","mcuentas_saldo","ctarjeta_debito_trx","ctarjeta_visa","ctarjeta_visa_trx","mtarjeta_visa_consumo","mtarjeta_master_consumo","cprestamos_personales","mprestamos_personales",
                     "mplazo_fijo_dolares","ccaja_seguridad","cpayroll_trx","mpayroll","mcuenta_debitos_automaticos","mtarjeta_visa_debitos_automaticos","mpagomiscuentas","ccomisiones_mantenimiento","mcomisiones_mantenimiento","ccomisiones_otras",
