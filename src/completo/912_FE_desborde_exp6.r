@@ -295,22 +295,11 @@ AgregarVariables  <- function( dataset )
     col1 = all_interactions[,position][1]
     col2 = all_interactions[,position][2]
     col_name = paste(col1,col2,sep="_PROD_")
-    prod = as.numeric(gsub(",",".",get(col1),fixed=TRUE)) * as.numeric(gsub(",",".",get(col2),fixed=TRUE))
-    dataset[ , toString(col_name)      :=  ifelse(is.infinite(prod),NA,prod)]
+    
+    dataset[ , toString(col_name)      :=  ifelse(is.infinite(as.numeric(gsub(",",".",get(col1),fixed=TRUE)) * as.numeric(gsub(",",".",get(col2),fixed=TRUE))),NA,
+                                                  as.numeric(gsub(",",".",get(col1),fixed=TRUE)) * as.numeric(gsub(",",".",get(col2),fixed=TRUE)))]
   }  
   
-  #valvula de seguridad para evitar valores NaN  que es 0/0
-  #paso los NaN a 0 , decision polemica si las hay
-  #se invita a asignar un valor razonable segun la semantica del campo creado
-  nans      <- lapply(names(dataset),function(.name) dataset[ , sum(is.nan(get(.name)))])
-  nans_qty  <- sum( unlist( nans) )
-  if( nans_qty > 0 )
-  {
-    cat( "ATENCION, hay", nans_qty, "valores NaN 0/0 en tu dataset. Seran pasados arbitrariamente a 0\n" )
-    cat( "Si no te gusta la decision, modifica a gusto el programa!\n\n")
-    dataset[mapply(is.nan, dataset)] <<- 0
-  }  
-
   ReportarCampos( dataset )
   print("Fin Prod variables")
 }

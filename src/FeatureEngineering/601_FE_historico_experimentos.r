@@ -251,21 +251,6 @@ AgregarVariables  <- function( dataset )
   dataset[ , mvr_mconsumototal       := mv_mconsumototal  / mv_mlimitecompra ]
   dataset[ , mvr_mpagominimo         := mv_mpagominimo  / mv_mlimitecompra ]
 
-  #Aqui debe usted agregar sus propias nuevas variables
-  
-  # 85 variables para hacer interacciones
-  campos_buenos = c("cliente_vip","internet","cliente_edad","cliente_antiguedad","mrentabilidad","mrentabilidad_annual","mcomisiones","mactivos_margen","mpasivos_margen","cproductos",
-                    "mcuenta_corriente_adicional","mcuenta_corriente","mcaja_ahorro","mcaja_ahorro_adicional","mcaja_ahorro_dolares","mdescubierto_preacordado","mcuentas_saldo","ctarjeta_debito_trx","mautoservicio","ctarjeta_visa")
-  
-  all_interactions = combn(campos_buenos, 2)
-  for (position in seq(length(all_interactions)/2))
-  {
-    col1 = all_interactions[,position][1]
-    col2 = all_interactions[,position][2]
-    col_name = paste(col1,col2,sep="_PROD_")
-    dataset[ , toString(col_name)      := as.numeric(gsub(",",".",get(col1),fixed=TRUE)) * as.numeric(gsub(",",".",get(col2),fixed=TRUE)) ]
-  }  
-
   #valvula de seguridad para evitar valores infinitos
   #paso los infinitos a NULOS
   infinitos      <- lapply(names(dataset),function(.name) dataset[ , sum(is.infinite(get(.name)))])
@@ -275,7 +260,40 @@ AgregarVariables  <- function( dataset )
     cat( "ATENCION, hay", infinitos_qty, "valores infinitos en tu dataset. Seran pasados a NA\n" )
     dataset[mapply(is.infinite, dataset)] <<- NA
   }
-
+  
+  
+  #valvula de seguridad para evitar valores NaN  que es 0/0
+  #paso los NaN a 0 , decision polemica si las hay
+  #se invita a asignar un valor razonable segun la semantica del campo creado
+  nans      <- lapply(names(dataset),function(.name) dataset[ , sum(is.nan(get(.name)))])
+  nans_qty  <- sum( unlist( nans) )
+  if( nans_qty > 0 )
+  {
+    cat( "ATENCION, hay", nans_qty, "valores NaN 0/0 en tu dataset. Seran pasados arbitrariamente a 0\n" )
+    cat( "Si no te gusta la decision, modifica a gusto el programa!\n\n")
+    dataset[mapply(is.nan, dataset)] <<- 0
+  }
+  
+  #Aqui debe usted agregar sus propias nuevas variables
+  
+  print("Comienzo Prod Variables")
+  # 85 variables para hacer interacciones
+  campos_buenos = c("cliente_vip","internet","cliente_edad","cliente_antiguedad","mrentabilidad","mrentabilidad_annual","mcomisiones","mactivos_margen","mpasivos_margen","cproductos",
+                    "mcuenta_corriente_adicional","mcuenta_corriente","mcaja_ahorro","mcaja_ahorro_adicional","mcaja_ahorro_dolares","mdescubierto_preacordado","mcuentas_saldo","ctarjeta_debito_trx","mautoservicio","ctarjeta_visa",
+                    "ctarjeta_visa_trx","mtarjeta_visa_consumo","ctarjeta_master_trx","mtarjeta_master_consumo","cprestamos_personales","mprestamos_personales","mprestamos_prendarios","mprestamos_hipotecarios","cplazo_fijo","mplazo_fijo_dolares",
+                    "cseguro_vida","cseguro_accidentes_personales","ccaja_seguridad","cpayroll_trx","mpayroll","ccuenta_debitos_automaticos","mcuenta_debitos_automaticos","ctarjeta_visa_debitos_automaticos","mtarjeta_visa_debitos_automaticos","mttarjeta_master_debitos_automaticos"
+  )
+  
+  all_interactions = combn(campos_buenos, 2)
+  for (position in seq(length(all_interactions)/2))
+  {
+    col1 = all_interactions[,position][1]
+    col2 = all_interactions[,position][2]
+    col_name = paste(col1,col2,sep="_PROD_")
+    
+    dataset[ , toString(col_name)      :=  ifelse(is.infinite(as.numeric(gsub(",",".",get(col1),fixed=TRUE)) * as.numeric(gsub(",",".",get(col2),fixed=TRUE))),NA,
+                                                  as.numeric(gsub(",",".",get(col1),fixed=TRUE)) * as.numeric(gsub(",",".",get(col2),fixed=TRUE)))]
+  }  
 
   #valvula de seguridad para evitar valores NaN  que es 0/0
   #paso los NaN a 0 , decision polemica si las hay
@@ -557,7 +575,7 @@ Rankeador  <- function( cols )
 setwd( "/home/manuel/Escritorio/ITBA/03-Minería_de_Datos/01-GIT/datasets/" )
 
 #cargo el dataset
-dataset   <- fread( "paquete_premium_202011.csv", nrows=10000)
+dataset   <- fread( "paquete_premium_202011.csv", nrows=5000)
 
 #ordeno el dataset por <numero_de_cliente, foto_mes> para poder hacer lags
 setorder( dataset, numero_de_cliente, foto_mes )
