@@ -651,7 +651,7 @@ if( PARAM$tendenciaYmuchomas3$correr )
   
 }
 
-if( PARAM$tendenciaYmuchoma6s$correr ) 
+if( PARAM$tendenciaYmuchomas6$correr ) 
 {
   p  <- PARAM$tendenciaYmuchomas6
   
