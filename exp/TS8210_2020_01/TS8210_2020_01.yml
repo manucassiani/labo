@@ -30,7 +30,7 @@ param:
       desde:  
       hasta:  
     excluir: [  ]
-    undersampling: [ {clase: "CONTINUA", prob: 0.5 } ]]  #ATENCION  sin undersampling
+    undersampling: [ {clase: "CONTINUA", prob: 0.5 } ]  #ATENCION  sin undersampling
 
   #donde valido
   validate:
