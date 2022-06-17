@@ -17,9 +17,9 @@ param:
   corregir: TRUE    #se se corrige los campos/foto_mes  MALOS
   variablesdrift: [] #variables que se eliminan porque estan mal en el futuro
   
-  variablesmanuales: FALSE
+  variablesmanuales: TRUE
 
-  acumulavars: FALSE   #a lo nuevo lo va aplicando
+  acumulavars: TRUE   #a lo nuevo lo va aplicando
 
   tendenciaYmuchomas: 
     correr: TRUE #Great power comes with great responsability
