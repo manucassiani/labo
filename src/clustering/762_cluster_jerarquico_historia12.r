@@ -84,7 +84,7 @@ dev.off()
 h <- 20
 distintos <- 0
 
-while(  h>0  &  !( distintos >=6 & distintos <=7 ) )
+while(  h>0  &  !( distintos >=3 & distintos <=4 ) )
 {
   h <- h - 1 
   rf.cluster  <- cutree( hclust.rf, h)
@@ -126,5 +126,5 @@ dataset12[ dataset,
            cluster2 := i.cluster2 ]
 
 fwrite( dataset12, 
-        file= "cluster_de_bajas_12meses.txt",
+        file= "cluster_de_bajas_12meses_4.txt",
         sep= "\t" )
