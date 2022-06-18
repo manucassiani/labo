@@ -25,7 +25,7 @@ param:
 
   #donde entreno
   train:
-    periodos: [ 202005, 202008, 202009, 202010]
+    periodos: [ 202005, 202006, 202008, 202009, 202010]
     rango:
       desde:  
       hasta:  
@@ -52,7 +52,7 @@ param:
 
   #donde entreno el modelo final
   train_final:
-    periodos: [ 202005, 202008, 202009, 202010]
+    periodos: [ 202005, 202006, 202008, 202009, 202010]
     rango:
       desde:  
       hasta:  
