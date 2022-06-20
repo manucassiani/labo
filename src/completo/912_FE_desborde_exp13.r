@@ -302,6 +302,7 @@ AgregarVariables  <- function( dataset )
   
   
   ReportarCampos( dataset )
+  return(dataset)
 }
 #------------------------------------------------------------------------------
 #esta funcion supone que dataset esta ordenado por   <numero_de_cliente, foto_mes>
@@ -579,13 +580,25 @@ if( PARAM$dummiesNA )  DummiesNA( dataset )  #esta linea debe ir ANTES de Correg
 
 if( PARAM$corregir )  Corregir( dataset )  #esta linea debe ir DESPUES de  DummiesNA
 
-if( PARAM$variablesmanuales )  AgregarVariables( dataset )
+if( PARAM$variablesmanuales ) {
 
+print("Longitud dataset previo AgregarVariables")
+print(length(dataset))
+print(colnames(dataset))  
+    
+dataset = AgregarVariables( dataset ) }
+
+print("Longitud dataset post AgregarVariables")
+print(length(dataset))
+print(colnames(dataset))
 
 #--------------------------------------
 #Esta primera parte es muuuy  artesanal  y discutible  ya que hay multiples formas de hacerlo
 
 cols_lagueables  <- copy( setdiff( colnames(dataset), PARAM$const$campos_fijos ) )
+print("cols_lagueables_1")
+print("-------------------")
+print(cols_lagueables)
 
 if( PARAM$tendenciaYmuchomas$correr ) 
 {
@@ -607,6 +620,12 @@ if( PARAM$tendenciaYmuchomas$correr )
 
 }
 
+CanaritosImportancia()
+cols_lagueables  <-  intersect( cols_lagueables,    colnames( dataset) )
+print("cols_lagueables_2")
+print("-------------------")
+print(cols_lagueables)
+
 if( PARAM$tendenciaYmuchomasCINCO$correr ) 
 {
   print("Entro en TendenciaYmuchomasCINCO")
@@ -626,6 +645,12 @@ if( PARAM$tendenciaYmuchomasCINCO$correr )
   )
   
 }
+
+CanaritosImportancia()
+cols_lagueables  <-  intersect( cols_lagueables,    colnames( dataset) ) 
+print("cols_lagueables_3")
+print("-------------------")
+print(cols_lagueables)
 
 if( PARAM$tendenciaYmuchomasOCHO$correr ) 
 {
