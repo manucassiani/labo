@@ -275,17 +275,12 @@ AgregarVariables  <- function( dataset )
   #Aqui debe usted agregar sus propias nuevas variables  
   
   print("Comienzo Prod + Sum Variables")
-  # 48 variables para hacer interacciones
+  # 33 variables para hacer interacciones
   campos_buenos = c("internet","cliente_edad","cliente_antiguedad","mrentabilidad","mrentabilidad_annual","mcomisiones","mactivos_margen","mpasivos_margen","cproductos","mcuenta_corriente",
-                    "mcaja_ahorro","mcaja_ahorro_dolares","mdescubierto_preacordado","mcuentas_saldo","ctarjeta_debito_trx","ctarjeta_visa", #16
+                    "mcaja_ahorro","mcaja_ahorro_dolares","mcuentas_saldo","mtarjeta_visa_consumo","mtarjeta_master_consumo","cprestamos_personales","mprestamos_personales","mplazo_fijo_dolares","mpayroll","mcuenta_debitos_automaticos",
+                    "mtarjeta_visa_debitos_automaticos","mpagomiscuentas","ccomisiones_mantenimiento","mcomisiones_mantenimiento","Visa_fultimo_cierre","Visa_fechaalta","ctransferencias_recibidas","mtransferencias_recibidas","mtransferencias_emitidas","ccallcenter_trx", "chomebanking_trx","ctrx_quarter","Visa_msaldopesos"
                     
-                    "ctarjeta_visa_trx","mtarjeta_visa_consumo","mtarjeta_master_consumo","cprestamos_personales","mprestamos_personales","mplazo_fijo_dolares","mpayroll","mcuenta_debitos_automaticos","mtarjeta_visa_debitos_automaticos","mpagomiscuentas",
-                    "ccomisiones_mantenimiento","mcomisiones_mantenimiento","ccomisiones_otras", #13
                     
-                    "Master_fultimo_cierre","Master_fechaalta","Visa_fultimo_cierre","Visa_fechaalta",
-                    
-                    "ctransferencias_recibidas","mtransferencias_recibidas","mtransferencias_emitidas","ccallcenter_trx","chomebanking_trx","ctrx_quarter","cmobile_app_trx","Master_mpagominimo","Visa_msaldototal","Visa_mfinanciacion_limite",
-                    "Visa_msaldopesos","Visa_mlimitecompra","Visa_mpagospesos","Visa_cconsumos","Visa_mpagominimo" #15
   )
   
   
@@ -646,7 +641,6 @@ if( PARAM$tendenciaYmuchomasCINCO$correr )
   
 }
 
-CanaritosImportancia()
 
 for( i in 1:length( PARAM$lag ) )
 {
