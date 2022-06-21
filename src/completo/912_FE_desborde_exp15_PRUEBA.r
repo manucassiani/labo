@@ -276,9 +276,7 @@ AgregarVariables  <- function( dataset )
   
   print("Comienzo Prod + Sum Variables")
   # 48 variables para hacer interacciones
-  campos_buenos = c("internet","cliente_edad","cliente_antiguedad","mrentabilidad","mrentabilidad_annual","mcomisiones","mactivos_margen","mpasivos_margen","cproductos","mcuenta_corriente",
-                    "mcaja_ahorro","mcaja_ahorro_dolares","mdescubierto_preacordado","mcuentas_saldo","ctarjeta_debito_trx","ctarjeta_visa"
-  )
+  campos_buenos = c("cliente_edad","cliente_antiguedad","mrentabilidad")
   
   
   all_interactions = combn(campos_buenos, 2)
