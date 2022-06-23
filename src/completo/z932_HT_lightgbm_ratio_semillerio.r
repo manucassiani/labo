@@ -75,11 +75,11 @@ fganancia_lgbm_meseta  <- function( probs, datos)
   setorder( tbl, -prob )
   tbl[ , posicion := .I ]
   tbl[ , gan_acum :=  cumsum( gan ) ]
-  
-  setorder( tbl, -gan_acum )  
 
-  gan  <- tbl[ 1:200 , mean(gan_acum) ]
-  pos  <- tbl[ 1:200 , as.integer( mean(posicion) ) ]
+  tbl[ , gan_mean := frollmean( gan_acum, n=300, align="center", na.rm=TRUE ) ]
+
+  pos  <- which.max(  tbl$gan_mean )
+  gan  <- tbl[ pos,  gan_mean ]
 
   vpos_optima  <<- c( vpos_optima, pos )
 
@@ -108,7 +108,8 @@ EstimarGanancia_lightgbm  <- function( x )
   param_completo$num_iterations         <- ifelse( param_fijos$boosting== "dart", 999, 99999 )  #un numero muy grande
   param_completo$early_stopping_rounds  <- as.integer(200 + 4/param_completo$learning_rate )
 
-  tb_prediccion_semillerio  <- as.data.table( list( "pred_acumulada" = rep( 0, nrow(dataset_test) )) ) 
+  tb_prediccion_semillerio_vali  <- as.data.table( list( "pred_acumulada" = rep( 0, nrow(dataset_validate) )) ) 
+  tb_prediccion_semillerio_test  <- as.data.table( list( "pred_acumulada" = rep( 0, nrow(dataset_test) )) ) 
 
   vnum_iterations   <- c()
   vposicion_optima  <- c()
@@ -131,29 +132,43 @@ EstimarGanancia_lightgbm  <- function( x )
     posicion_optima  <- vpos_optima[ modelo_train$best_iter ]
     vposicion_optima  <- c( vposicion_optima , posicion_optima )
 
-    #aplico el modelo a testing y calculo la ganancia
-    prediccion  <- predict( modelo_train, 
-                            data.matrix( dataset_test[ , campos_buenos, with=FALSE]) )
+    #aplico el modelo
+    prediccion_vali  <- predict( modelo_train, 
+                                 data.matrix( dataset_validate[ , campos_buenos, with=FALSE]) )
+
+    prediccion_test  <- predict( modelo_train, 
+                                 data.matrix( dataset_test[ , campos_buenos, with=FALSE]) )
 
     tbl  <- copy( dataset_test[ , list(clase01) ] )
-    tbl[ , prob := prediccion ]
+    tbl[ , prob := prediccion_test ]
     setorder( tbl, -prob )
     ganancia_test  <- tbl[ 1:posicion_optima, 
                            sum( ifelse( clase01, PARAM$const$POS_ganancia, PARAM$const$NEG_ganancia ) )]
 
     vganancia_test  <- c( vganancia_test, ganancia_test )
 
-    tb_prediccion_semillerio[  , pred_acumulada := pred_acumulada +  as.numeric( frank(prediccion, ties.method= "random") ) ]
+    tb_prediccion_semillerio_test[  , pred_acumulada := pred_acumulada +  as.numeric( frank(prediccion_test, ties.method= "random") ) ]
+    tb_prediccion_semillerio_vali[  , pred_acumulada := pred_acumulada +  as.numeric( frank(prediccion_vali, ties.method= "random") ) ]
 
   }
 
+  tbl  <- copy( dataset_validate[ , list(clase01) ] )
+  tbl[ , prob := tb_prediccion_semillerio_vali$pred_acumulada ]
+  setorder( tbl, -prob )
+  tbl[ , gan :=  ifelse( clase01, PARAM$const$POS_ganancia, PARAM$const$NEG_ganancia ) ]
+  tbl[ , gan_acum := cumsum( gan ) ]
+  tbl[ , gan_mean := frollmean( gan_acum, n=300, align="center", na.rm=TRUE ) ]
+  
+  corte_optimo_validate  <- which.max(  tbl$gan_mean )
+
+
   tbl  <- copy( dataset_test[ , list(clase01) ] )
-  tbl[ , prob := tb_prediccion_semillerio$pred_acumulada ]
+  tbl[ , prob := tb_prediccion_semillerio_test$pred_acumulada ]
 
   setorder( tbl, -prob )
   tbl[ , pos := .I ]
 
-  cantidad_test_normalizada  <- as.integer( nrow(dataset_test) * (mean(vposicion_optima) / nrow( dvalidate )) )
+  cantidad_test_normalizada  <- corte_optimo_validate
 
   cat( "posicion_optima:",  mean(vposicion_optima), "  "  )
   for( i in 1:length(vposicion_optima) ) cat( vposicion_optima[i], "  " ) 
@@ -163,13 +178,16 @@ EstimarGanancia_lightgbm  <- function( x )
   ganancia_test  <- tbl[ pos <= cantidad_test_normalizada, 
                          sum( ifelse( clase01, PARAM$const$POS_ganancia, PARAM$const$NEG_ganancia ) )]
 
-  rm( tbl )
-  gc()
 
   ganancia_test_normalizada  <- test_multiplicador * ganancia_test
 
   cat( "gan_individual:", test_multiplicador*min( vganancia_test ), test_multiplicador*mean( vganancia_test ), test_multiplicador*max( vganancia_test ), "\n",
-       "gan_ensemble:",  ganancia_test_normalizada, "\n" )
+       "gan_ensemble_promedio:",  test_multiplicador * tbl[ pos <= mean(vpos_optima),  sum( ifelse( clase01, PARAM$const$POS_ganancia, PARAM$const$NEG_ganancia ) )] , "\n" ,
+       "gan_ensemble_estimado:",  ganancia_test_normalizada, "\n" )
+
+  rm( tbl )
+  gc()
+
 
   #voy grabando las mejores column importance
   if( ganancia_test_normalizada >  GLOBAL_ganancia )
@@ -187,7 +205,7 @@ EstimarGanancia_lightgbm  <- function( x )
   xx  <- copy( c( param_fijos,  x ) )
   xx$early_stopping_rounds  <- NULL
   xx$num_iterations  <- as.integer( mean( vnum_iterations ) )
-  xx$estimulos   <-  cantidad_test_normalizada
+  xx$estimulos  <- test_multiplicador * cantidad_test_normalizada
   xx$ganancia  <- ganancia_test_normalizada
   xx$iteracion_bayesiana  <- GLOBAL_iteracion
 
@@ -361,7 +379,7 @@ if( PARAM$crossvalidation == FALSE )
                                label= dataset[ part_validate==1, clase01],
                                free_raw_data= FALSE
                              )
-
+    dataset_validate <- dataset[ part_validate== 1, ]
     dataset_test  <- dataset[ part_test== 1 ]
     test_multiplicador  <- 1
 
@@ -381,6 +399,7 @@ if( PARAM$crossvalidation == FALSE )
                                free_raw_data= FALSE
                              )
 
+    dataset_validate <- dataset[ part_test==1 & fold_test==1, ]
     dataset_test  <- dataset[ part_test==1 & fold_test==2, ]
     test_multiplicador  <- 2
   }
