@@ -1,0 +1,56 @@
+1) MAXIMA (vm-prueba) vcpu=8, RAM=624, disco=size=1200
+
+gcloud compute instances create vm-prueba --project=primordial-arc-351013 --zone=us-west4-b --machine-type=custom-8-638976-ext --network-interface=network-tier=PREMIUM,subnet=default --metadata=shutdown-script=suicidio.sh --no-restart-on-failure --maintenance-policy=TERMINATE --provisioning-model=SPOT --instance-termination-action=DELETE --service-account=180069278332-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform --tags=http-server --create-disk=auto-delete=yes,boot=yes,device-name=vm-prueba,image=projects/primordial-arc-351013/global/images/image-dm,mode=rw,size=1200,type=projects/primordial-arc-351013/zones/us-west4-b/diskTypes/pd-standard --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
+
+
+2) MINIMA (vm-prueba) vcpu=8, RAM=128, disco=size=400 -> ZZ
+
+gcloud compute instances create vm-zz-exp510 --project=primordial-arc-351013 --zone=us-west4-b --machine-type=custom-8-131072-ext --network-interface=network-tier=PREMIUM,subnet=default --maintenance-policy=MIGRATE --provisioning-model=STANDARD --service-account=180069278332-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform --tags=http-server --create-disk=auto-delete=yes,boot=yes,device-name=vm-ts-exp2,image=projects/primordial-arc-351013/global/images/image-dm,mode=rw,size=400,type=projects/primordial-arc-351013/zones/us-west4-b/diskTypes/pd-standard --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
+
+3) TS vcpu=8, RAM=256, disco=512
+
+gcloud compute instances create vm-ht-v6 --project=primordial-arc-351013 --zone=us-west4-b --machine-type=custom-4-262144-ext --network-interface=network-tier=PREMIUM,subnet=default --metadata=shutdown-script=suicidio.sh --no-restart-on-failure --maintenance-policy=TERMINATE --provisioning-model=SPOT --instance-termination-action=DELETE --service-account=180069278332-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform --tags=http-server --create-disk=auto-delete=yes,boot=yes,device-name=ts-exp-53,image=projects/primordial-arc-351013/global/images/image-dm,mode=rw,size=512,type=projects/primordial-arc-351013/zones/us-west4-b/diskTypes/pd-standard --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
+
+
+4) BAYESIANA vcpu=8, RAM=256, disco=500
+
+gcloud compute instances create continue-zz-410 --project=primordial-arc-351013 --zone=us-west4-b --machine-type=custom-16-262144-ext --network-interface=network-tier=PREMIUM,subnet=default --metadata=shutdown-script=suicidio.sh --no-restart-on-failure --maintenance-policy=TERMINATE --provisioning-model=SPOT --instance-termination-action=DELETE --service-account=180069278332-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform --tags=http-server --create-disk=auto-delete=yes,boot=yes,device-name=vm-ht-exp530,image=projects/primordial-arc-351013/global/images/image-dm,mode=rw,size=500,type=projects/primordial-arc-351013/zones/us-west4-b/diskTypes/pd-standard --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
+
+5) BAYESIANA 2 vcpu=8, RAM=512, disco=600
+
+gcloud compute instances create vm-ht-exp400v5 --project=primordial-arc-351013 --zone=us-west4-b --machine-type=custom-4-524288-ext --network-interface=network-tier=PREMIUM,subnet=default --metadata=shutdown-script=suicidio.sh --no-restart-on-failure --maintenance-policy=TERMINATE --provisioning-model=SPOT --instance-termination-action=DELETE --service-account=180069278332-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform --tags=http-server --create-disk=auto-delete=yes,boot=yes,device-name=vm-ht-exp410,image=projects/primordial-arc-351013/global/images/image-dm,mode=rw,size=600,type=projects/primordial-arc-351013/zones/us-west4-b/diskTypes/pd-standard --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
+
+6) HT ZZ EXPERIMENTO vcpu=2 RAM=128 disco=300
+
+gcloud compute instances create vm-zz-final-30 --project=primordial-arc-351013 --zone=us-west4-b --machine-type=custom-4-131072-ext --network-interface=network-tier=PREMIUM,subnet=default --metadata=shutdown-script=suicidio.sh --no-restart-on-failure --maintenance-policy=TERMINATE --provisioning-model=SPOT --instance-termination-action=DELETE --service-account=180069278332-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform --tags=http-server --create-disk=auto-delete=yes,boot=yes,device-name=vm-ts-201909,image=projects/primordial-arc-351013/global/images/image-dm,mode=rw,size=300,type=projects/primordial-arc-351013/zones/us-west4-b/diskTypes/pd-standard --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
+
+7) TS EXPERIMENTO vcpu=2 RAM=256 disco=512
+
+gcloud compute instances create vm-hibridacion-v2 --project=primordial-arc-351013 --zone=us-west4-b --machine-type=custom-8-262144-ext --network-interface=network-tier=PREMIUM,subnet=default --metadata=shutdown-script=suicidio.sh --no-restart-on-failure --maintenance-policy=TERMINATE --provisioning-model=SPOT --instance-termination-action=DELETE --service-account=180069278332-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform --tags=http-server --create-disk=auto-delete=yes,boot=yes,device-name=vm-ts-201909,image=projects/primordial-arc-351013/global/images/image-dm,mode=rw,size=512,type=projects/primordial-arc-351013/zones/us-west4-b/diskTypes/pd-standard --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
+
+8) FE FOERTE vcpu=16 RAM=512 disco=1024
+
+gcloud compute instances create vm-fe-exp13 --project=primordial-arc-351013 --zone=us-west4-b --machine-type=custom-24-524288-ext --network-interface=network-tier=PREMIUM,subnet=default --metadata=shutdown-script=suicidio.sh --no-restart-on-failure --maintenance-policy=TERMINATE --provisioning-model=SPOT --instance-termination-action=DELETE --service-account=180069278332-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform --tags=http-server --create-disk=auto-delete=yes,boot=yes,device-name=vm-fe-exp13,image=projects/primordial-arc-351013/global/images/image-dm,mode=rw,size=1024,type=projects/primordial-arc-351013/zones/us-west4-b/diskTypes/pd-standard --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
+
+
+Exp900v5
+Envios 12500
+
+9) ULTIMA vcpu=8 , RAM=400, disco=800
+
+gcloud compute instances create vm-zz-exp900v5 --project=primordial-arc-351013 --zone=us-west4-a --machine-type=custom-8-409600-ext --network-interface=network-tier=PREMIUM,subnet=default --metadata=shutdown-script=suicidio.sh --no-restart-on-failure --maintenance-policy=TERMINATE --provisioning-model=SPOT --instance-termination-action=DELETE --service-account=180069278332-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform --tags=http-server --create-disk=auto-delete=yes,boot=yes,device-name=vm-zz-exp400v5,image=projects/primordial-arc-351013/global/images/image-dm,mode=rw,size=800,type=projects/primordial-arc-351013/zones/us-west4-a/diskTypes/pd-standard --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
+
+10) LOWA
+
+gcloud compute instances create vm-ht-exp1500v5 --project=primordial-arc-351013 --zone=us-central1-a --machine-type=custom-8-409600-ext --network-interface=network-tier=PREMIUM,subnet=default --metadata=shutdown-script=suicidio.sh --no-restart-on-failure --maintenance-policy=TERMINATE --provisioning-model=SPOT --instance-termination-action=DELETE --service-account=180069278332-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform --tags=http-server --create-disk=auto-delete=yes,boot=yes,device-name=vm-ht-exp1500v5,image=projects/primordial-arc-351013/global/images/image-dm,mode=rw,size=800,type=projects/primordial-arc-351013/zones/us-central1-a/diskTypes/pd-standard --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
+
+11) 16gb us-central
+
+gcloud compute instances create vm-zz-exp1500v5 --project=primordial-arc-351013 --zone=us-central1-a --machine-type=custom-16-409600-ext --network-interface=network-tier=PREMIUM,subnet=default --metadata=shutdown-script=suicidio.sh --no-restart-on-failure --maintenance-policy=TERMINATE --provisioning-model=SPOT --instance-termination-action=DELETE --service-account=180069278332-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform --tags=http-server --create-disk=auto-delete=yes,boot=yes,device-name=vm-zz-exp1500v5,image=projects/primordial-arc-351013/global/images/image-dm,mode=rw,size=800,type=projects/primordial-arc-351013/zones/us-central1-a/diskTypes/pd-standard --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
+
+12) exp9
+
+gcloud compute instances create vm-zz-exp900v5-intento2 --project=primordial-arc-351013 --zone=us-west2-a --machine-type=custom-8-409600-ext --network-interface=network-tier=PREMIUM,subnet=default --metadata=shutdown-script=suicidio.sh --no-restart-on-failure --maintenance-policy=TERMINATE --provisioning-model=SPOT --instance-termination-action=DELETE --service-account=180069278332-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform --tags=http-server --create-disk=auto-delete=yes,boot=yes,device-name=vm-zz-exp900v5-intento2,image=projects/primordial-arc-351013/global/images/image-dm,mode=rw,size=800,type=projects/primordial-arc-351013/zones/us-west2-a/diskTypes/pd-standard --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
+
+Hibridacion V2
+envios 14000

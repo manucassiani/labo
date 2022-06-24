@@ -1,0 +1,18 @@
+Ariel Krysa00:10
+Buenas!
+Con un poco de delay y llegando desde atrás en la Tarea Cuatro, dejo unos comentarios sobre el punto tres (Clustering jerárquico).
+
+Una vez corrido el programa y obtenidos los promedios por cluster (archivo cluster_de_bajas.txt), construí un par de medidas resumen para ver las variables/dimensiones que son significativamente distintas entre los clústeres.
+En primer lugar, para tener una primera noción de dispersión entre los centroides, tomé el coeficiente de variación (desvío/media) de cada uno de ellos. Como un umbral inferior puse un valor absoluto de 2 (primera tabla) y 1,5 (segunda tabla). Para cada una de las variables filtradas busqué cuál era el clúster con promedio máximo y la cantidad de desvíos que presenta su valor respecto a la media de los centroides. Algunas variables tienen todos los centroides en cero excepto alguno de los clústeres (en estos casos “Clúster máximo” en la tabla no tiene valor).
+Como se ve en la tabla, las variables con mayor dispersión tienen en su mayoría un máximo entre 2 y 3 desvíos por encima respecto a la media (última columna). En general los máximos están dados por el clúster 1. Por otro lado, es llamativa la dispersión del monto total de la ganancia que el banco ha obtenido en concepto de intereses que ha cobrado al cliente (mactivos_margen) y saldo de todas las cuentas del cliente (mcuentas_saldo).
+
+image.png
+
+
+image.png
+
+
+El clúster 1 se caracteriza por tener mayores saldos, pagos en dólares, consumos en pesos VISA, cheques depositados, entre otros.
+El clúster 2 le provee mayores ganancias por intereses al banco, y posee mayor rentabilidad.
+El clúster 3 se distingue por mayores pagos de servicios, mayor pago mínimo en master, y morosidad en master.
+El clúster 4 cuenta con saldos más altos de todas las cuentas (mcuentas_saldo), en el marco de una dispersión muy alta entre los centroides de los clústeres.
